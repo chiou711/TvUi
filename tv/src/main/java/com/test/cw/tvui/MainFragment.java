@@ -58,8 +58,8 @@ public class MainFragment extends BrowseFragment {
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
     private static final int NUM_ROWS = 6;
-    private static final int NUM_COLS = 15;//TODO
-//    private static final int NUM_COLS = 1;
+//    private static final int NUM_COLS = 15;//TODO
+    private static final int NUM_COLS = 5;
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -100,13 +100,15 @@ public class MainFragment extends BrowseFragment {
 
         int i;
         for (i = 0; i < NUM_ROWS; i++) {
-            if (i != 0) {
-                Collections.shuffle(list);
-            }
+//            if (i != 0) {
+//                Collections.shuffle(list);
+//            }
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-            for (int j = 0; j < NUM_COLS; j++) {
-                listRowAdapter.add(list.get(j % 5));
+//            for (int j = 0; j < NUM_COLS; j++) {
+                for (int j = 0; j < NUM_COLS; j++) {
+//                listRowAdapter.add(list.get(j % 5));
+                listRowAdapter.add(list.get(j));
             }
 
             HeaderItem header = new HeaderItem(i, MovieList.MOVIE_CATEGORY[i]);
