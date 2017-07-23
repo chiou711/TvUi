@@ -23,6 +23,7 @@ import java.util.TimerTask;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
@@ -57,7 +58,8 @@ public class MainFragment extends BrowseFragment {
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
-    private static final int NUM_ROWS = 6;
+//    private static final int NUM_ROWS = 6; //TODO
+    private static final int NUM_ROWS = 2;
 //    private static final int NUM_COLS = 15;//TODO
     private static final int NUM_COLS = 5;
 
@@ -74,7 +76,10 @@ public class MainFragment extends BrowseFragment {
         Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
 
-        prepareBackgroundManager();
+        //???  java.lang.NullPointerException:
+        // Attempt to invoke virtual method 'void android.support.v17.leanback.app
+        // .BackgroundManager$TranslucentLayerDrawable.setWrapperAlpha(int, int)' on a null object reference
+//        prepareBackgroundManager();
 
         setupUIElements();
 
@@ -93,13 +98,15 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void loadRows() {
-        List<Movie> list = MovieList.setupMovies();
+//        List<Movie> list = MovieList.setupMovies();
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
         int i;
         for (i = 0; i < NUM_ROWS; i++) {
+            List<Movie> list = MovieList.setupMovies(i);
+
 //            if (i != 0) {
 //                Collections.shuffle(list);
 //            }
@@ -165,31 +172,31 @@ public class MainFragment extends BrowseFragment {
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
-    protected void updateBackground(String uri) {
-        int width = mMetrics.widthPixels;
-        int height = mMetrics.heightPixels;
-        Glide.with(getActivity())
-                .load(uri)
-                .centerCrop()
-                .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
-                    @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
-                                                        glideAnimation) {
-                        mBackgroundManager.setDrawable(resource);
-                    }
-                });
-        mBackgroundTimer.cancel();
-    }
+//    protected void updateBackground(String uri) {
+//        int width = mMetrics.widthPixels;
+//        int height = mMetrics.heightPixels;
+//        Glide.with(getActivity())
+//                .load(uri)
+//                .centerCrop()
+//                .error(mDefaultBackground)
+//                .into(new SimpleTarget<GlideDrawable>(width, height) {
+//                    @Override
+//                    public void onResourceReady(GlideDrawable resource,
+//                                                GlideAnimation<? super GlideDrawable>
+//                                                        glideAnimation) {
+//                        mBackgroundManager.setDrawable(resource);
+//                    }
+//                });
+//        mBackgroundTimer.cancel();
+//    }
 
-    private void startBackgroundTimer() {
-        if (null != mBackgroundTimer) {
-            mBackgroundTimer.cancel();
-        }
-        mBackgroundTimer = new Timer();
-        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
-    }
+//    private void startBackgroundTimer() {
+//        if (null != mBackgroundTimer) {
+//            mBackgroundTimer.cancel();
+//        }
+//        mBackgroundTimer = new Timer();
+//        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
+//    }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
@@ -199,14 +206,21 @@ public class MainFragment extends BrowseFragment {
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.MOVIE, movie);
-
-                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
-                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
-                getActivity().startActivity(intent, bundle);
+//                Intent intent = new Intent(getActivity(), DetailsActivity.class);
+//                intent.putExtra(DetailsActivity.MOVIE, movie);
+//
+//                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+//                        getActivity(),
+//                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+//                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+//                getActivity().startActivity(intent, bundle);
+                ///
+                String id = Util.getYoutubeId(movie.getVideoUrl());
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                intent.putExtra("force_fullscreen",true);
+                intent.putExtra("finish_on_ended",true);
+                getActivity().startActivity(intent);
+                ///
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
@@ -223,29 +237,29 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-            if (item instanceof Movie) {
-                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
-                startBackgroundTimer();
-            }
+//            if (item instanceof Movie) {
+//                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
+//                startBackgroundTimer();
+//            }
 
         }
     }
 
-    private class UpdateBackgroundTask extends TimerTask {
-
-        @Override
-        public void run() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mBackgroundURI != null) {
-                        updateBackground(mBackgroundURI.toString());
-                    }
-                }
-            });
-
-        }
-    }
+//    private class UpdateBackgroundTask extends TimerTask {
+//
+//        @Override
+//        public void run() {
+//            mHandler.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (mBackgroundURI != null) {
+//                        updateBackground(mBackgroundURI.toString());
+//                    }
+//                }
+//            });
+//
+//        }
+//    }
 
     private class GridItemPresenter extends Presenter {
         @Override
