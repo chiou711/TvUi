@@ -100,20 +100,6 @@ public class VideoDetailsFragment extends DetailsFragment {
     @Override
     public void onStop() {
         super.onStop();
-//        Intent intent = new Intent(getActivity(), MainActivity.class);
-//        startActivity(intent);
-//        getActivity().onBackPressed();
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-//        String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
-//        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-//        intent.putExtra("force_fullscreen",true);
-//        intent.putExtra("finish_on_ended",true);
-//        getActivity().startActivity(intent);
     }
 
     private void prepareBackgroundManager() {
@@ -196,7 +182,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 //                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
 //                    startActivity(intent);
                     ///
-                    //TODO
+                    //TODO: launch YouTube
                     String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
            			intent.putExtra("force_fullscreen",true);
