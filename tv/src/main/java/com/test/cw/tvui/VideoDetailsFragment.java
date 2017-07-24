@@ -182,12 +182,12 @@ public class VideoDetailsFragment extends DetailsFragment {
 //                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
 //                    startActivity(intent);
                     ///
-                    //TODO: launch YouTube
+                    //TODO: launch YouTube by detailsPresenter button click
                     String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-           			intent.putExtra("force_fullscreen",true);
-        			intent.putExtra("finish_on_ended",true);
-                    getActivity().startActivity(intent);
+//           		intent.putExtra("force_fullscreen",true);
+//        			intent.putExtra("finish_on_ended",true);
+                    startActivity(intent);
                     ///
 
                 } else {

@@ -18,6 +18,11 @@ android {
     }
     productFlavors {
     }
+    sourceSets {
+        main {
+            assets.srcDirs = ['preferred/assets/']
+        }
+    }
 }
 
 dependencies {

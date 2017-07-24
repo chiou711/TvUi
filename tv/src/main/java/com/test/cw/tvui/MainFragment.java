@@ -14,12 +14,14 @@
 
 package com.test.cw.tvui;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -30,7 +32,6 @@ import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
-import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
@@ -38,7 +39,6 @@ import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -47,11 +47,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
 
@@ -59,7 +54,7 @@ public class MainFragment extends BrowseFragment {
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
     static final int NUM_ROWS = 5; //TODO rows
-    static final int NUM_COLS = 10;//TODO columns
+    static final int NUM_COLS = 150;//TODO columns
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -101,22 +96,49 @@ public class MainFragment extends BrowseFragment {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
+        //TODO import asset file
+        // get file name
+        int position  = 0;
+        String fileName = "default"+ (position+1) + ".xml";
+
+        // extract
+        createDefaultRows(getActivity(), fileName);
+
+
+        // verify
+        int countColumns = 0;
+        int countRows = 0;
+        for(int i=0;i<Import_handleXmlFile.pageArr.length;i++)
+        {
+            String pageTitle = Import_handleXmlFile.pageArr[i];
+            if(!Util.isEmptyString(pageTitle)) {
+                countRows++;
+                System.out.println("Import_handleXmlFile.pageArr[" + i + "]=" + pageTitle);
+            }
+            for(int j=0;j<Import_handleXmlFile.linkArr[i].length;j++)
+            {
+                String link = Import_handleXmlFile.linkArr[i][j];
+                if(!Util.isEmptyString(link)) {
+                    countColumns++;
+                    System.out.println("Import_handleXmlFile.linkArr[" + i + "][" + j + "]=" + link);
+                }
+            }
+        }
+
+        // prepare for setup movies
         int i;
-        for (i = 0; i < NUM_ROWS; i++) {
+        for (i = 0; i < countRows; i++)
+        {
             List<Movie> list = MovieList.setupMovies(i);
-
-//            if (i != 0) {
-//                Collections.shuffle(list);
-//            }
-
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-//            for (int j = 0; j < NUM_COLS; j++) {
-                for (int j = 0; j < NUM_COLS; j++) {
-//                listRowAdapter.add(list.get(j % 5));
+
+            for (int j = 0; j < countColumns; j++)
+            {
                 listRowAdapter.add(list.get(j));
             }
 
-            HeaderItem header = new HeaderItem(i, MovieList.MOVIE_CATEGORY[i]);
+//            HeaderItem header = new HeaderItem(i, MovieList.MOVIE_CATEGORY[i]);
+            HeaderItem header = new HeaderItem(i, Import_handleXmlFile.pageArr[i]);
             mRowsAdapter.add(new ListRow(header, listRowAdapter));
         }
 
@@ -132,6 +154,32 @@ public class MainFragment extends BrowseFragment {
         setAdapter(mRowsAdapter);
 
     }
+
+    Import_handleXmlFile importObject;
+    //TODO create default rows
+    public void createDefaultRows(Activity act, String fileName)
+    {
+        System.out.println("Import_selectedFileAct / _createDefaultRows / fileName = " + fileName);
+
+        FileInputStream fileInputStream = null;
+        File assetsFile = Util.createAssetsFile(act,fileName);
+        try
+        {
+            fileInputStream = new FileInputStream(assetsFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+        // import data by HandleXmlByFile class
+        importObject = new Import_handleXmlFile(fileInputStream,act);
+        importObject.handleXML();
+        while(importObject.parsingComplete){
+        }
+
+    }
+
 
     private void prepareBackgroundManager() {
 
@@ -212,13 +260,14 @@ public class MainFragment extends BrowseFragment {
 //                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
 //                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 //                getActivity().startActivity(intent, bundle);
-                ///
+
+                //TODO: launch YouTube by item view click
                 String id = Util.getYoutubeId(movie.getVideoUrl());
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
                 getActivity().startActivity(intent);
-                ///
+
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
