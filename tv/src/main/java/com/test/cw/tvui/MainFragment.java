@@ -53,8 +53,8 @@ public class MainFragment extends BrowseFragment {
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
-    static final int NUM_ROWS = 5; //TODO rows
-    static final int NUM_COLS = 150;//TODO columns
+    static final int NUM_PAGES = 15; //TODO rows
+    static final int NUM_LINKS = 150;//TODO columns
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -76,7 +76,7 @@ public class MainFragment extends BrowseFragment {
 
         setupUIElements();
 
-        loadRows();
+        loadItems();
 
         setupEventListeners();
     }
@@ -90,8 +90,9 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    private void loadRows() {
-//        List<Movie> list = MovieList.setupMovies();
+    static String[] pagesArr = new String[NUM_PAGES];
+    static String[][] linksArr = new String[NUM_PAGES][NUM_LINKS];
+    private void loadItems() {
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
@@ -101,49 +102,37 @@ public class MainFragment extends BrowseFragment {
         int position  = 0;
         String fileName = "default"+ (position+1) + ".xml";
 
-        // extract
-        createDefaultRows(getActivity(), fileName);
+        // parse
+        parseFile(getActivity(), fileName);
 
-
-        // verify
-        int countColumns = 0;
+        // prepare items
         int countRows = 0;
-        for(int i=0;i<Import_handleXmlFile.pageArr.length;i++)
+        for(int i = 0; i< pagesArr.length; i++)
         {
-            String pageTitle = Import_handleXmlFile.pageArr[i];
-            if(!Util.isEmptyString(pageTitle)) {
-                countRows++;
-                System.out.println("Import_handleXmlFile.pageArr[" + i + "]=" + pageTitle);
-            }
-            for(int j=0;j<Import_handleXmlFile.linkArr[i].length;j++)
-            {
-                String link = Import_handleXmlFile.linkArr[i][j];
-                if(!Util.isEmptyString(link)) {
-                    countColumns++;
-                    System.out.println("Import_handleXmlFile.linkArr[" + i + "][" + j + "]=" + link);
-                }
-            }
-        }
+            String pageTitle = pagesArr[i];
 
-        // prepare for setup movies
-        int i;
-        for (i = 0; i < countRows; i++)
-        {
             List<Movie> list = MovieList.setupMovies(i);
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
 
-            for (int j = 0; j < countColumns; j++)
-            {
-                listRowAdapter.add(list.get(j));
+            // pages
+            if(!Util.isEmptyString(pageTitle)) {
+                HeaderItem header = new HeaderItem(i, pagesArr[i]);
+                mRowsAdapter.add(new ListRow(header, listRowAdapter));
+                System.out.println("MainFragment / _loadItems / pagesArr[" + i + "]=" + pageTitle);
             }
 
-//            HeaderItem header = new HeaderItem(i, MovieList.MOVIE_CATEGORY[i]);
-            HeaderItem header = new HeaderItem(i, Import_handleXmlFile.pageArr[i]);
-            mRowsAdapter.add(new ListRow(header, listRowAdapter));
+            // links
+            for(int j = 0; j< Util.getContentArrayLength(linksArr[i]); j++)
+            {
+                String link = linksArr[i][j];
+                listRowAdapter.add(list.get(j));
+                // verify
+                System.out.println("MainFragment / _loadItems / linksArr[" + i + "][" + j + "]=" + link);
+            }
         }
 
-        HeaderItem gridHeader = new HeaderItem(i, "PREFERENCES");
-
+        // other
+        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
         gridRowAdapter.add(getResources().getString(R.string.grid_view));
@@ -151,15 +140,15 @@ public class MainFragment extends BrowseFragment {
         gridRowAdapter.add(getResources().getString(R.string.personal_settings));
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
+        // set adapter
         setAdapter(mRowsAdapter);
-
     }
 
-    Import_handleXmlFile importObject;
+    ParseStream parsedObject;
     //TODO create default rows
-    public void createDefaultRows(Activity act, String fileName)
+    public void parseFile(Activity act, String fileName)
     {
-        System.out.println("Import_selectedFileAct / _createDefaultRows / fileName = " + fileName);
+        System.out.println("MainFragment / _parseFile / fileName = " + fileName);
 
         FileInputStream fileInputStream = null;
         File assetsFile = Util.createAssetsFile(act,fileName);
@@ -173,22 +162,21 @@ public class MainFragment extends BrowseFragment {
         }
 
         // import data by HandleXmlByFile class
-        importObject = new Import_handleXmlFile(fileInputStream,act);
-        importObject.handleXML();
-        while(importObject.parsingComplete){
-        }
+        parsedObject = new ParseStream(act,fileInputStream);
+        parsedObject.handleXML();
+        while(parsedObject.parsingComplete){}
 
     }
 
 
-    private void prepareBackgroundManager() {
-
-        mBackgroundManager = BackgroundManager.getInstance(getActivity());
-        mBackgroundManager.attach(getActivity().getWindow());
-        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
-        mMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
-    }
+//    private void prepareBackgroundManager() {
+//
+//        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+//        mBackgroundManager.attach(getActivity().getWindow());
+//        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
+//        mMetrics = new DisplayMetrics();
+//        getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
+//    }
 
     private void setupUIElements() {
         // setBadgeDrawable(getActivity().getResources().getDrawable(
@@ -244,6 +232,8 @@ public class MainFragment extends BrowseFragment {
 //        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
 //    }
 
+    static int currPageId;
+    static int currLinkId;
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -262,11 +252,20 @@ public class MainFragment extends BrowseFragment {
 //                getActivity().startActivity(intent, bundle);
 
                 //TODO: launch YouTube by item view click
+                currPageId = (int)row.getId();
+                currLinkId = (int)movie.getId();
+                // get real link Id in row
+                for(int i = 0; i< currPageId; i++)
+                    currLinkId -= linksArr[i].length;
+
+                System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
+                System.out.println("MainFragment / _onItemClicked / currLinkId = "+ currLinkId);
                 String id = Util.getYoutubeId(movie.getVideoUrl());
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
-                getActivity().startActivity(intent);
+                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+//                getActivity().startActivity(intent);
 
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {

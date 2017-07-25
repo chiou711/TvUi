@@ -33,7 +33,7 @@ public class JsonAsync extends AsyncTask <URL,Void,String> //Generic: Params, Pr
 
     @Override
     protected void onPostExecute(String result) {
-    	System.out.println("JsonAsync / _onPostExecute / result (title)= " + result);
+//    	System.out.println("JsonAsync / _onPostExecute / result (title)= " + result);
 		if(!this.isCancelled())
 		{
 			this.cancel(true);

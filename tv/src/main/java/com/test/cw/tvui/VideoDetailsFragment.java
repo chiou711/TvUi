@@ -61,9 +61,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
 
-    //TODO
     private static final int NUM_COLS = 10;
-//    private static final int NUM_COLS = 1;
 
     private Movie mSelectedMovie;
 

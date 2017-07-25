@@ -8,7 +8,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-class Import_handleXmlFile {
+class ParseStream {
 
    private String pageName,title,body,picture,audio,link;
    private Context mContext;
@@ -20,10 +20,8 @@ class Import_handleXmlFile {
 //   private boolean mEnableInsertDB = true;
 
    //
-   static String[][] linkArr = new String[MainFragment.NUM_ROWS][MainFragment.NUM_COLS];
-   static String[] pageArr = new String[MainFragment.NUM_ROWS];
 
-   Import_handleXmlFile(FileInputStream fileInputStream, Context context)
+   ParseStream(Context context,FileInputStream fileInputStream)
    {
 	   mContext = context;
 	   this.fileInputStream = fileInputStream;
@@ -53,7 +51,7 @@ class Import_handleXmlFile {
          while (event != XmlPullParser.END_DOCUMENT) 
          {
         	 String name = myParser.getName(); //name: null, link, item, title, description
-//        	 System.out.println("Import_handleXmlFile / _parseXMLAndInsertDB / name = " + name);
+//        	 System.out.println("ParseStream / _parseXMLAndInsertDB / name = " + name);
         	 switch (event)
 	         {
 	            case XmlPullParser.START_TAG:
@@ -68,15 +66,13 @@ class Import_handleXmlFile {
 	            break;
 	            
 	            case XmlPullParser.END_TAG:
-//	               if((linkIndex >= MainFragment.NUM_COLS)|| (pageIndex >= MainFragment.NUM_ROWS))
-//                       break;
 		           if(name.equals("page_name"))
 		           {
 	                  pageName = text.trim();
 	                  
 					  //TODO add page
                       pageIndex++;
-                      pageArr[pageIndex] = pageName;
+                      MainFragment.pagesArr[pageIndex] = pageName;
                       linkIndex = -1;
 		        	  fileBody = fileBody.concat(Util.NEW_LINE + "=== " + "Page:" + " " + pageName + " ===");
 	               }
@@ -110,12 +106,7 @@ class Import_handleXmlFile {
 		            	  if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
 		            	  {
                               linkIndex++;
-                              linkArr[pageIndex][linkIndex] = link;
-
-//                              if(linkIndex >= MainFragment.NUM_COLS) {
-//                                  pageIndex++;
-//                                  linkIndex = 0;
-//                              }
+							  MainFragment.linksArr[pageIndex][linkIndex] = link;
 		            	  }
 	            	  }
 		              fileBody = fileBody.concat(Util.NEW_LINE + strSplitter);
@@ -123,7 +114,7 @@ class Import_handleXmlFile {
 		        	  fileBody = fileBody.concat(Util.NEW_LINE + "body:" + " " + body);
 		        	  fileBody = fileBody.concat(Util.NEW_LINE + "picture:" + " " + picture);
 		        	  fileBody = fileBody.concat(Util.NEW_LINE + "audio:" + " " + audio);
-		        	  fileBody = fileBody.concat(Util.NEW_LINE + "link:" + " " + linkArr);
+		        	  fileBody = fileBody.concat(Util.NEW_LINE + "link:" + " " + MainFragment.linksArr);
 	            	  fileBody = fileBody.concat(Util.NEW_LINE);
 	               }	               
 	               break;

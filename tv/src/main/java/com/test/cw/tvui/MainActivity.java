@@ -15,6 +15,8 @@
 package com.test.cw.tvui;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 /*
@@ -29,5 +31,37 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == MovieList.REQUEST_CONTINUE_PLAY)
+        {
+            MainFragment.currLinkId++;
+
+            int linksLen = Util.getContentArrayLength(MainFragment.linksArr[MainFragment.currPageId]);
+            System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
+            // meet boundary
+            if(MainFragment.currLinkId >= linksLen)
+            {
+                MainFragment.currPageId++;
+                MainFragment.currLinkId =0;
+            }
+
+            int pagesLen = Util.getContentArrayLength(MainFragment.pagesArr);
+            if(MainFragment.currPageId >= pagesLen)
+                MainFragment.currPageId = 0;
+
+            System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
+            System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
+
+            String urlStr = MainFragment.linksArr[MainFragment.currPageId][MainFragment.currLinkId];
+            String id = Util.getYoutubeId(urlStr);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+            intent.putExtra("force_fullscreen",true);
+            intent.putExtra("finish_on_ended",true);
+            startActivityForResult(intent,999);
+        }
     }
 }

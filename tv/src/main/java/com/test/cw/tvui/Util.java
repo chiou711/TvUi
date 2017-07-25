@@ -223,4 +223,14 @@ public class Util {
         return appName;
     }
 
+    static int getContentArrayLength(String[] arr)
+    {
+        int len = 0;
+        for(int i=0; i<arr.length; i++)
+        {
+            if(!Util.isEmptyString(arr[i]))
+                len++;
+        }
+        return len;
+    }
 }
