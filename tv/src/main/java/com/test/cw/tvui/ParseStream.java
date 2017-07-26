@@ -14,14 +14,14 @@ class ParseStream {
    private Context mContext;
    
    private FileInputStream fileInputStream = null;
-   volatile boolean parsingComplete = true;
+   volatile boolean isParsing = true;
    String fileBody = "";
    private String strSplitter;
 //   private boolean mEnableInsertDB = true;
 
    //
 
-   ParseStream(Context context,FileInputStream fileInputStream)
+   ParseStream(Context context, FileInputStream fileInputStream)
    {
 	   mContext = context;
 	   this.fileInputStream = fileInputStream;
@@ -122,7 +122,7 @@ class ParseStream {
         	 event = myParser.next();
          }
 //         System.out.println("import_handleXmlFile / fileBody = " + fileBody);
-         parsingComplete = false;
+         isParsing = false;
       } 
       catch (Exception e) 
       {

@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Timer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -63,6 +66,8 @@ public class MainFragment extends BrowseFragment {
     private Timer mBackgroundTimer;
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
+    AlertDialog alertDlg;
+    AlertDialog alertDlg2;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -76,9 +81,18 @@ public class MainFragment extends BrowseFragment {
 
         setupUIElements();
 
-        loadItems();
+        // dialog for Continue loading
+        boolean isNew = true;
 
-        setupEventListeners();
+        if(isNew) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Will load data now")
+                   .setMessage("Continue?")
+                   .setNegativeButton("Yes", listener_load)
+                   .setPositiveButton("No", null);
+            alertDlg = builder.create();
+            alertDlg.show();
+        }
     }
 
     @Override
@@ -93,7 +107,7 @@ public class MainFragment extends BrowseFragment {
     static String[] pagesArr = new String[NUM_PAGES];
     static String[][] linksArr = new String[NUM_PAGES][NUM_LINKS];
     private void loadItems() {
-
+        System.out.println("_loadItems");
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
@@ -103,7 +117,7 @@ public class MainFragment extends BrowseFragment {
         String fileName = "default"+ (position+1) + ".xml";
 
         // parse
-        parseFile(getActivity(), fileName);
+        parseFile(getActivity(),fileName);
 
         // prepare items
         int countRows = 0;
@@ -144,14 +158,36 @@ public class MainFragment extends BrowseFragment {
         setAdapter(mRowsAdapter);
     }
 
+    DialogInterface.OnClickListener listener_load = new DialogInterface.OnClickListener(){
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if(alertDlg.isShowing())
+                alertDlg.dismiss();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Load data")
+                   .setMessage("Start loading ...");
+            alertDlg2 = builder.create();
+            alertDlg2.setOnShowListener(new OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialog) {
+                System.out.println("onShow");
+                loadItems();
+                setupEventListeners();
+                }
+            });
+            alertDlg2.show();
+        }
+    };
+
+
     ParseStream parsedObject;
     //TODO create default rows
-    public void parseFile(Activity act, String fileName)
+    public void parseFile(Activity act, final String fileName)
     {
         System.out.println("MainFragment / _parseFile / fileName = " + fileName);
-
         FileInputStream fileInputStream = null;
-        File assetsFile = Util.createAssetsFile(act,fileName);
+        File assetsFile = Util.createAssetsFile(getActivity(),fileName);
         try
         {
             fileInputStream = new FileInputStream(assetsFile);
@@ -162,10 +198,9 @@ public class MainFragment extends BrowseFragment {
         }
 
         // import data by HandleXmlByFile class
-        parsedObject = new ParseStream(act,fileInputStream);
+        parsedObject = new ParseStream(getActivity(),fileInputStream);
         parsedObject.handleXML();
-        while(parsedObject.parsingComplete){}
-
+        while(parsedObject.isParsing){}
     }
 
 
@@ -193,6 +228,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void setupEventListeners() {
+        System.out.println("_setupEventListeners");
         setOnSearchClickedListener(new View.OnClickListener() {
 
             @Override
@@ -204,6 +240,9 @@ public class MainFragment extends BrowseFragment {
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
+
+        if(alertDlg2 != null)
+            alertDlg2.dismiss();
     }
 
 //    protected void updateBackground(String uri) {
@@ -264,8 +303,8 @@ public class MainFragment extends BrowseFragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
-                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
-//                getActivity().startActivity(intent);
+//                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+                getActivity().startActivity(intent);
 
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {

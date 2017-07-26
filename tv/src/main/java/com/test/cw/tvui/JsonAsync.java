@@ -11,10 +11,8 @@ import java.net.URL;
 
 public class JsonAsync extends AsyncTask <URL,Void,String> //Generic: Params, Progress, Result
 {
-	URL embededURL;
 	String title="";
-	
-	
+
     @Override
     protected void onPreExecute(){
     }

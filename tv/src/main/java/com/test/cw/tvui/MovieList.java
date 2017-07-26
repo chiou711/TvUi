@@ -40,8 +40,9 @@ public final class MovieList {
         for(int i=0; i<len; i++)
         {
             String url = videoUrl[i];
-            if(!Util.isEmptyString(url))
-                title[i] = Util.getYouTubeTitle(url);
+            if(!Util.isEmptyString(url)) {
+                title[i] = Util.getYouTubeTitle(url); //??? will affect dialog for showing loading
+            }
         }
 
         //TODO: add to list
