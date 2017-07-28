@@ -24,7 +24,6 @@ import java.util.Timer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -50,14 +49,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.test.cw.tvui.db.DB_folder;
+import com.test.cw.tvui.db.DB_page;
+import com.test.cw.tvui.operation.ParseStreamToDB;
+
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
 
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
-    static final int NUM_PAGES = 15; //TODO rows
-    static final int NUM_LINKS = 150;//TODO columns
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -66,8 +67,8 @@ public class MainFragment extends BrowseFragment {
     private Timer mBackgroundTimer;
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
-    AlertDialog alertDlg;
-    AlertDialog alertDlg2;
+    public static AlertDialog alertDlg;
+    public static boolean isNew;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -82,18 +83,43 @@ public class MainFragment extends BrowseFragment {
         setupUIElements();
 
         // dialog for Continue loading
-        boolean isNew = true;
-
+        isNew = !Util.getPref_has_default_import(MainActivity.mAct,0);
         if(isNew) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle("Will load data now")
-                   .setMessage("Continue?")
-                   .setNegativeButton("Yes", listener_load)
+            builder.setTitle("Will load data items")
+                   .setMessage("It takes a period to load completely.")
+                   .setNegativeButton("Wait", listener_wait)
                    .setPositiveButton("No", null);
             alertDlg = builder.create();
             alertDlg.show();
+
+            alertDlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    loadItemsByDB();
+                    setupEventListeners();
+                }
+            });
+        }
+        else
+        {
+            loadItemsByDB();
+            setupEventListeners();
         }
     }
+
+    DialogInterface.OnClickListener listener_wait = new DialogInterface.OnClickListener(){
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+//            loadItemsByDB();
+//            setupEventListeners();
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
+        }
+    };
+
 
     @Override
     public void onDestroy() {
@@ -104,45 +130,53 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    static String[] pagesArr = new String[NUM_PAGES];
-    static String[][] linksArr = new String[NUM_PAGES][NUM_LINKS];
-    private void loadItems() {
-        System.out.println("_loadItems");
+    // load items by DB
+    private void loadItemsByDB()
+    {
+        System.out.println("_loadItemsByDB");
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
-        //TODO import asset file
-        // get file name
-        int position  = 0;
-        String fileName = "default"+ (position+1) + ".xml";
-
-        // parse
-        parseFile(getActivity(),fileName);
-
+        //TODO import DB data
         // prepare items
         int countRows = 0;
-        for(int i = 0; i< pagesArr.length; i++)
-        {
-            String pageTitle = pagesArr[i];
 
-            List<Movie> list = MovieList.setupMovies(i);
+        // Only one folder, default folder table id = 1
+        DB_folder db_folder = new DB_folder(getActivity(),1);
+        int pagesCount = db_folder.getPagesCount(true);
+
+        for(int i = 0; i< pagesCount; i++)
+        {
+            //TODO page
+            db_folder = new DB_folder(getActivity(),1);
+            String pageTitle = db_folder.getPageTitle(i,true);
+
+            List<Movie> list = MovieList.setupMoviesByDB(i);
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
 
             // pages
             if(!Util.isEmptyString(pageTitle)) {
-                HeaderItem header = new HeaderItem(i, pagesArr[i]);
+                HeaderItem header = new HeaderItem(i, pageTitle);
                 mRowsAdapter.add(new ListRow(header, listRowAdapter));
-                System.out.println("MainFragment / _loadItems / pagesArr[" + i + "]=" + pageTitle);
+                System.out.println("MainFragment / _loadItemsByDB / pageTitle = " + pageTitle);
             }
 
             // links
-            for(int j = 0; j< Util.getContentArrayLength(linksArr[i]); j++)
+            int pageTableId = db_folder.getPageTableId(i,true);
+            DB_page db_page = new DB_page(getActivity(),pageTableId);
+            db_page.open();
+            int linkCount = db_page.getNotesCount(false);
+            for(int j = 0; j<linkCount ; j++)
             {
-                String link = linksArr[i][j];
+                //TODO links
+                String link = db_page.getNoteLinkUri(j,false);
                 listRowAdapter.add(list.get(j));
                 // verify
-                System.out.println("MainFragment / _loadItems / linksArr[" + i + "][" + j + "]=" + link);
+                System.out.println("MainFragment / _loadItemsByDB / link = " + link);
             }
+            db_page.close();
+
+            countRows++;
         }
 
         // other
@@ -158,30 +192,7 @@ public class MainFragment extends BrowseFragment {
         setAdapter(mRowsAdapter);
     }
 
-    DialogInterface.OnClickListener listener_load = new DialogInterface.OnClickListener(){
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            if(alertDlg.isShowing())
-                alertDlg.dismiss();
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle("Load data")
-                   .setMessage("Start loading ...");
-            alertDlg2 = builder.create();
-            alertDlg2.setOnShowListener(new OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                System.out.println("onShow");
-                loadItems();
-                setupEventListeners();
-                }
-            });
-            alertDlg2.show();
-        }
-    };
-
-
-    ParseStream parsedObject;
+    ParseStreamToDB parsedObject;
     //TODO create default rows
     public void parseFile(Activity act, final String fileName)
     {
@@ -198,7 +209,7 @@ public class MainFragment extends BrowseFragment {
         }
 
         // import data by HandleXmlByFile class
-        parsedObject = new ParseStream(getActivity(),fileInputStream);
+        parsedObject = new ParseStreamToDB(getActivity(),fileInputStream);
         parsedObject.handleXML();
         while(parsedObject.isParsing){}
     }
@@ -240,9 +251,6 @@ public class MainFragment extends BrowseFragment {
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
-
-        if(alertDlg2 != null)
-            alertDlg2.dismiss();
     }
 
 //    protected void updateBackground(String uri) {
@@ -294,17 +302,31 @@ public class MainFragment extends BrowseFragment {
                 currPageId = (int)row.getId();
                 currLinkId = (int)movie.getId();
                 // get real link Id in row
-                for(int i = 0; i< currPageId; i++)
-                    currLinkId -= linksArr[i].length;
 
+                for(int i = 0; i< currPageId; i++) {
+
+                    DB_folder db_folder = new DB_folder(MainActivity.mAct,1);
+                    int page_table = db_folder.getPageTableId(i,true);
+
+                    DB_page db_page = new DB_page(MainActivity.mAct,page_table);
+                    db_page.open();
+                    int length = db_page.getNotesCount(false);
+                    System.out.println("MainFragment / _onItemClicked / length ("+i+")= "+ length);
+
+                    currLinkId -= length;
+                    db_page.close();
+                }
                 System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
                 System.out.println("MainFragment / _onItemClicked / currLinkId = "+ currLinkId);
                 String id = Util.getYoutubeId(movie.getVideoUrl());
+                System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
-//                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+                // Play once
                 getActivity().startActivity(intent);
+                // Continue play
+//                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
 
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
@@ -368,5 +390,4 @@ public class MainFragment extends BrowseFragment {
         public void onUnbindViewHolder(ViewHolder viewHolder) {
         }
     }
-
 }

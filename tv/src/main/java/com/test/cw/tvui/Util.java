@@ -2,11 +2,13 @@ package com.test.cw.tvui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.app.FragmentActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +28,16 @@ import java.util.regex.Pattern;
  */
 
 public class Util {
+
+    private static Context mContext;
+    private Activity mAct;
+
+    public Util(){}
+
+    public Util(Activity activity) {
+        mContext = activity;
+        mAct = activity;
+    }
 
     public static String NEW_LINE = "\r" + System.getProperty("line.separator");
 
@@ -232,5 +244,21 @@ public class Util {
                 len++;
         }
         return len;
+    }
+
+    // set has default import
+    public static void setPref_has_default_import(Activity act, boolean has,int position )
+    {
+        SharedPreferences pref = act.getSharedPreferences("last_time_view", 0);
+        String keyName = "KEY_HAS_DEFAULT_IMPORT"+position;
+        pref.edit().putBoolean(keyName, has).apply();
+    }
+
+    // get has default import
+    public static boolean getPref_has_default_import(Context context,int position)
+    {
+        SharedPreferences pref = context.getSharedPreferences("last_time_view", 0);
+        String keyName = "KEY_HAS_DEFAULT_IMPORT"+position;
+        return pref.getBoolean(keyName, false);
     }
 }

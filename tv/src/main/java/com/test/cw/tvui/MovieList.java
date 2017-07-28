@@ -1,5 +1,7 @@
 package com.test.cw.tvui;
 
+import com.test.cw.tvui.db.DB_page;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,21 +9,33 @@ import java.util.List;
 public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
     static List<Movie> list;
-
-    static List<Movie> setupMovies(int pageNo)
+    static List<Movie> setupMoviesByDB(int pageNo)
     {
+        int pageTableId = pageNo + 1;
         list = new ArrayList<>();
 
         // description
         String description = "Movie description: oxoxoxox....";
 
         //TODO: URL list
-        int len = MainFragment.linksArr[pageNo].length;
+        DB_page db_page = new DB_page(MainActivity.mAct,pageTableId);
+        db_page.open();
+
+        int len = db_page.getNotesCount(false);
+
         String[] title = new String[len];
         String[] videoUrl = new String[len];
+        String[] cardImageUrl = new String[len];
+
         for(int i=0;i<len;i++)
         {
-            videoUrl[i] = MainFragment.linksArr[pageNo][i];
+            videoUrl[i] = db_page.getNoteLinkUri(i,false);
+            //TODO: card image
+            cardImageUrl[i] = "http://img.youtube.com/vi/"+ Util.getYoutubeId(videoUrl[i])+"/0.jpg";
+            if(!Util.isEmptyString(videoUrl[i])) {
+//                title[i] = Util.getYouTubeTitle(videoUrl[i]); //will affect dialog for showing loading
+                title[i] = db_page.getNoteTitle(i,false);
+            }
         }
 
 
@@ -30,31 +44,18 @@ public final class MovieList {
                 "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/April%20Fool's%202013/Introducing%20Google%20Fiber%20to%20the%20Pole/bg.jpg",
         };
 
-        //TODO: card image
-        String[] cardImageUrl = new String[len];
-        for(int i=0; i<len; i++)
-        {
-            String url = videoUrl[i];
-            cardImageUrl[i] = "http://img.youtube.com/vi/"+ Util.getYoutubeId(url)+"/0.jpg";
-        }
-        for(int i=0; i<len; i++)
-        {
-            String url = videoUrl[i];
-            if(!Util.isEmptyString(url)) {
-                title[i] = Util.getYouTubeTitle(url); //??? will affect dialog for showing loading
-            }
-        }
+        db_page.close();
 
         //TODO: add to list
         for(int i=0;i<len;i++)
         {
             list.add(buildMovieInfo("category",
-                                    title[i],
-                                    description,
-                                    "Item "+ pageNo +"-"+String.valueOf(i+1),
-                                    videoUrl[i],
-                                    cardImageUrl[i],
-                                    bgImageUrl[0])  );
+                    title[i],
+                    description,
+                    "Item "+ pageTableId +"-"+String.valueOf(i+1),
+                    videoUrl[i],
+                    cardImageUrl[i],
+                    bgImageUrl[0])  );
         }
         return list;
     }

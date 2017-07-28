@@ -14,24 +14,88 @@
 
 package com.test.cw.tvui;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+
+import com.test.cw.tvui.db.DB_folder;
+import com.test.cw.tvui.db.DB_page;
+import com.test.cw.tvui.folder.Folder;
+import com.test.cw.tvui.operation.Import_selectedFileAct;
+import com.test.cw.tvui.preference.Define;
 
 /*
  * MainActivity class that loads MainFragment
  */
 public class MainActivity extends Activity {
+//    public static DB_drawer mDb_drawer;
+    public static DB_folder mDb_folder;
+    public DB_page mDb_page;
     /**
      * Called when the activity is first created.
      */
+    public static Activity mAct;
+    Context context;
+    final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 98;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAct = this;
+        context = getApplicationContext();
+
+
+        //refer: https://developer.android.com/training/permissions/requesting.html#perm-request
+        // runtime permission
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)//api23
+        {
+            // check permission
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                                                  new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                                                Manifest.permission.READ_EXTERNAL_STORAGE  },
+                                                  PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+        else
+            createDB_data();
     }
+
+    // callback of granted permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        System.out.println("grantResults.length =" + grantResults.length);
+        switch (requestCode)
+        {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    createDB_data();
+                }
+                else
+                {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }//case
+        }//switch
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -40,7 +104,16 @@ public class MainActivity extends Activity {
         {
             MainFragment.currLinkId++;
 
-            int linksLen = Util.getContentArrayLength(MainFragment.linksArr[MainFragment.currPageId]);
+            // page
+            DB_folder db_folder = new DB_folder(this,1);
+            int pageTableId = db_folder.getPageTableId(MainFragment.currPageId,true);
+
+            // link
+            DB_page db_page = new DB_page(MainActivity.mAct,pageTableId);
+            db_page.open();
+            int linksLen = db_page.getNotesCount(false);
+            db_page.close();
+
             System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
             // meet boundary
             if(MainFragment.currLinkId >= linksLen)
@@ -48,20 +121,57 @@ public class MainActivity extends Activity {
                 MainFragment.currPageId++;
                 MainFragment.currLinkId =0;
             }
-
-            int pagesLen = Util.getContentArrayLength(MainFragment.pagesArr);
-            if(MainFragment.currPageId >= pagesLen)
-                MainFragment.currPageId = 0;
-
             System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
             System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
 
-            String urlStr = MainFragment.linksArr[MainFragment.currPageId][MainFragment.currLinkId];
+            // new page
+            db_folder = new DB_folder(this,1);
+            db_folder.open();
+            int pagesLen = db_folder.getPagesCount(false);
+            db_folder.close();
+
+            if(MainFragment.currPageId >= pagesLen)
+                MainFragment.currPageId = 0;
+
+            // link
+            pageTableId = db_folder.getPageTableId(MainFragment.currPageId,true);
+            db_page = new DB_page(mAct,pageTableId);
+            String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId,true);
             String id = Util.getYoutubeId(urlStr);
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
             intent.putExtra("force_fullscreen",true);
             intent.putExtra("finish_on_ended",true);
             startActivityForResult(intent,999);
         }
+    }
+
+    void createDB_data()
+    {
+        // init DB
+        mDb_folder = new DB_folder(context, 1);//folderTableId);
+        mDb_page = new DB_page(context,1);//pageTableId);
+
+        final boolean ENABLE_DB_CHECK = false;//true;//false
+        if(ENABLE_DB_CHECK)
+            Folder.listAllPageTables(mAct);
+
+        if(Define.HAS_PREFERENCE)
+        {
+            // Check preference and Create default tables
+            if( !Util.getPref_has_default_import(MainActivity.mAct,0) )
+            {
+                MainFragment.isNew = true;
+                String fileName = "default1.xml";
+
+                int folderTableId = 1;
+                DB_folder.setFocusFolder_tableId(folderTableId);
+
+                // import default tables
+                Import_selectedFileAct.createDefaultTables(mAct,fileName);
+            }
+            else
+                MainFragment.isNew = false;
+        }
+
     }
 }
