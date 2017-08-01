@@ -58,7 +58,7 @@ public class Import_selectedFileAct extends Activity
         mTitleViewText = (TextView) findViewById(R.id.view_title);
         mBodyViewText = (TextView) findViewById(R.id.view_body);
 
-	    getActionBar().setDisplayShowHomeEnabled(false);
+//	    getActionBar().setDisplayShowHomeEnabled(false);
 
 		ProgressBar progressBar = (ProgressBar) findViewById(R.id.import_progress);
 		if(savedInstanceState == null) {
@@ -184,7 +184,7 @@ public class Import_selectedFileAct extends Activity
             e.printStackTrace();
         }
 
-        // import data by HandleXmlByFile class
+        // import data by ParseStreamToDB class
         importObject = new ParseStreamToDB(act,fileInputStream);
         importObject.enableInsertDB(true);
         importObject.handleXML();

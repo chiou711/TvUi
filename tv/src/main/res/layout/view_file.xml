@@ -15,7 +15,7 @@
 		android:layout_height="wrap_content"
 		android:textSize="22sp" android:textStyle="bold"
 		android:paddingLeft="3dp"
-		android:text="string/config_import_SDCard_confirm_title" />
+		android:text="File content confirmation" />
 	<View android:layout_width="match_parent" android:layout_height="1dp" android:background="#4f4f4f" />	
 		
 	<TextView 
@@ -23,7 +23,7 @@
 		android:layout_height="wrap_content" 
 		android:textSize="20sp" android:textStyle="italic"
 		android:paddingLeft="3dp"
-		android:text="string/config_SDCard_filename" />
+		android:text="Filename:" />
 	<ScrollView 
     	android:layout_width="match_parent"
     	android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
 		android:layout_height="wrap_content"
 		android:paddingLeft="3dp"
 		android:textSize="20sp" android:textStyle="italic"
-		android:text="string/config_SDCard_file_content" />
+		android:text="Content:" />
 	<ScrollView 
     	android:layout_width="match_parent"
     	android:layout_height="0dp" android:layout_weight="1"
@@ -66,17 +66,17 @@
 			android:id="@+id/view_back"
 			android:layout_width="0dp" android:layout_weight="1"
 			android:layout_height="50dp"
-			android:text="string/view_note_button_back" />
+			android:text="Back" />
 		<Button
 			android:id="@+id/view_delete"
 			android:layout_width="0dp" android:layout_weight="1"
 			android:layout_height="50dp"
-			android:text="string/edit_note_button_delete" />
+			android:text="Delete" />
 	    <Button
 	        android:id="@+id/view_confirm"
 	        android:layout_width="0dp" android:layout_weight="1"
 	        android:layout_height="50dp"
-	        android:text="string/btn_OK" />
+	        android:text="OK" />
 	</LinearLayout>
 </LinearLayout>
 <LinearLayout

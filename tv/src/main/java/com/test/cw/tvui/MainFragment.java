@@ -21,8 +21,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Timer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -51,7 +51,7 @@ import android.widget.Toast;
 
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
-import com.test.cw.tvui.operation.ParseStreamToDB;
+import com.test.cw.tvui.operation.Import_fromSDCardAct;
 
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
@@ -111,12 +111,7 @@ public class MainFragment extends BrowseFragment {
     DialogInterface.OnClickListener listener_wait = new DialogInterface.OnClickListener(){
         @Override
         public void onClick(DialogInterface dialog, int which) {
-//            loadItemsByDB();
-//            setupEventListeners();
-            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
-            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
-            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
-            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();//??? not show
         }
     };
 
@@ -192,29 +187,6 @@ public class MainFragment extends BrowseFragment {
         setAdapter(mRowsAdapter);
     }
 
-    ParseStreamToDB parsedObject;
-    //TODO create default rows
-    public void parseFile(Activity act, final String fileName)
-    {
-        System.out.println("MainFragment / _parseFile / fileName = " + fileName);
-        FileInputStream fileInputStream = null;
-        File assetsFile = Util.createAssetsFile(getActivity(),fileName);
-        try
-        {
-            fileInputStream = new FileInputStream(assetsFile);
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-
-        // import data by HandleXmlByFile class
-        parsedObject = new ParseStreamToDB(getActivity(),fileInputStream);
-        parsedObject.handleXML();
-        while(parsedObject.isParsing){}
-    }
-
-
 //    private void prepareBackgroundManager() {
 //
 //        mBackgroundManager = BackgroundManager.getInstance(getActivity());
@@ -244,8 +216,9 @@ public class MainFragment extends BrowseFragment {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
-                        .show();
+//                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getActivity(), Import_fromSDCardAct.class);
+                startActivity(intent);
             }
         });
 

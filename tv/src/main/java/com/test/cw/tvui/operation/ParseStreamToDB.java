@@ -47,7 +47,16 @@ public class ParseStreamToDB {
 
         int event;
         String text=null;
-        int lastPageId = 0;
+
+        // last page table Id
+        int lastPageTableId;
+        if(MainFragment.isNew)
+            lastPageTableId = 0;
+        else {
+            mDb_folder.open();
+            lastPageTableId = mDb_folder.getPagesCount(false);
+            mDb_folder.close();
+        }
 
         try
         {
@@ -77,18 +86,18 @@ public class ParseStreamToDB {
                         if(mEnableInsertDB)
                         {
                             int style = 0;//Util.getNewPageStyle(mContext);
-                            lastPageId++;
+                            lastPageTableId++;
 
-                            DB_page.setFocusPage_tableId(lastPageId);
+                            DB_page.setFocusPage_tableId(lastPageTableId);
                             // style is not set in XML file, so insert default style instead
                             long retId = mDb_folder.insertPage(DB_folder.getFocusFolder_tableName(),
                                     pageName,
-                                    lastPageId,
+                                    lastPageTableId,
                                     style );
                             System.out.println("retId = " + retId);
 
                             // insert table for new tab
-                            mDb_folder.insertPageTable(mDb_folder,1, lastPageId, false );//TODO drawerId = 1
+                            mDb_folder.insertPageTable(mDb_folder,1, lastPageTableId, false );//TODO drawerId = 1
                         }
 
 		        	    fileBody = fileBody.concat(Util.NEW_LINE + "=== " + "Page:" + " " + pageName + " ===");
@@ -116,7 +125,7 @@ public class ParseStreamToDB {
 	            	    link = text.trim();
 	            	    if(mEnableInsertDB)
 	            	    {
-		            	    DB_page.setFocusPage_tableId(lastPageId);//TabsHost.getLastExist_TabId());
+		            	    DB_page.setFocusPage_tableId(lastPageTableId);//TabsHost.getLastExist_TabId());
 						    //TODO add links
 		            	    if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
 		            	    {
