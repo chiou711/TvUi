@@ -15,7 +15,9 @@
 	    	android:id="@android:id/list"
 	        android:layout_width="match_parent"
 	        android:layout_height="0dp"
-	        android:layout_weight="1"/>
+	        android:layout_weight="1"
+            android:nextFocusDown="@+id/view_back"
+            android:nextFocusRight="@+id/view_back"/>
 	<View android:layout_width="match_parent" android:layout_height="1dip" android:background="#4f4f4f" />
 
 	<LinearLayout
@@ -30,8 +32,11 @@
 		android:layout_width="100dp"
 	    android:layout_height="wrap_content"
 		android:text="Back"
-		android:background="@drawable/button"
 		android:layout_margin="5dp"
-		android:textColor="@android:color/white" />
+		android:textColor="@android:color/white"
+        android:nextFocusUp="@android:id/list"
+        android:nextFocusLeft="@android:id/list"
+        android:background="@drawable/button_nav">
+	</Button>
 	</LinearLayout>
 </LinearLayout>

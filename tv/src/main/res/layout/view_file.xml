@@ -24,10 +24,7 @@
 		android:textSize="20sp" android:textStyle="italic"
 		android:paddingLeft="3dp"
 		android:text="Filename:" />
-	<ScrollView 
-    	android:layout_width="match_parent"
-    	android:layout_height="wrap_content"
-    	android:orientation="vertical" >
+
 	<TextView android:id="@+id/view_title" 
 		  	android:layout_width="match_parent"
 			android:layout_height="wrap_content" 
@@ -35,18 +32,21 @@
 		    android:textSize="20sp"
 		    android:minLines="1"
 			/>
-	</ScrollView>			
 	<View android:layout_width="match_parent" android:layout_height="1dip" android:background="#4f4f4f" />
 	
-	<TextView android:layout_width="match_parent"
+	<TextView
+        android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:paddingLeft="3dp"
 		android:textSize="20sp" android:textStyle="italic"
 		android:text="Content:" />
-	<ScrollView 
+	<ScrollView
+        android:id="@+id/view_body_scrollview"
     	android:layout_width="match_parent"
     	android:layout_height="0dp" android:layout_weight="1"
-    	android:orientation="vertical" >
+    	android:orientation="vertical"
+        android:nextFocusRight="@+id/view_back"
+        android:nextFocusDown="@+id/view_back">
 	<TextView android:id="@+id/view_body" 
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -66,17 +66,31 @@
 			android:id="@+id/view_back"
 			android:layout_width="0dp" android:layout_weight="1"
 			android:layout_height="50dp"
-			android:text="Back" />
+			android:text="Back"
+			android:background="@drawable/button_nav"
+            android:nextFocusLeft="@+id/view_body_scrollview"
+            android:nextFocusUp="@+id/view_body_scrollview"
+            android:nextFocusRight="@+id/view_delete"
+            android:nextFocusDown="@+id/view_delete"/>
 		<Button
 			android:id="@+id/view_delete"
 			android:layout_width="0dp" android:layout_weight="1"
 			android:layout_height="50dp"
-			android:text="Delete" />
+			android:text="Delete"
+			android:background="@drawable/button_nav"
+            android:nextFocusLeft="@+id/view_back"
+            android:nextFocusUp="@+id/view_body_scrollview"
+            android:nextFocusRight="@+id/view_confirm"
+            android:nextFocusDown="@+id/view_confirm"/>
 	    <Button
 	        android:id="@+id/view_confirm"
 	        android:layout_width="0dp" android:layout_weight="1"
 	        android:layout_height="50dp"
-	        android:text="OK" />
+	        android:text="OK"
+			android:background="@drawable/button_nav"
+            android:nextFocusLeft="@+id/view_delete"
+            android:nextFocusUp="@+id/view_body_scrollview"
+            />
 	</LinearLayout>
 </LinearLayout>
 <LinearLayout

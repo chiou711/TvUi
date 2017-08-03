@@ -130,11 +130,27 @@ public class MainFragment extends BrowseFragment {
     {
         System.out.println("_loadItemsByDB");
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+
         CardPresenter cardPresenter = new CardPresenter();
 
         //TODO import DB data
         // prepare items
         int countRows = 0;
+
+        ///
+        // other
+        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
+        GridItemPresenter mGridPresenter = new GridItemPresenter();
+        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
+//        gridRowAdapter.add(getResources().getString(R.string.grid_view));
+//        gridRowAdapter.add(getString(R.string.error_fragment));
+//        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
+        gridRowAdapter.add("1st folder");
+        gridRowAdapter.add("2nd folder");
+        gridRowAdapter.add("3rd folder");
+        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+        ///
+
 
         // Only one folder, default folder table id = 1
         DB_folder db_folder = new DB_folder(getActivity(),1);
@@ -175,13 +191,13 @@ public class MainFragment extends BrowseFragment {
         }
 
         // other
-        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
-        GridItemPresenter mGridPresenter = new GridItemPresenter();
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-        gridRowAdapter.add(getResources().getString(R.string.grid_view));
-        gridRowAdapter.add(getString(R.string.error_fragment));
-        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
-        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+//        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
+//        GridItemPresenter mGridPresenter = new GridItemPresenter();
+//        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
+//        gridRowAdapter.add(getResources().getString(R.string.grid_view));
+//        gridRowAdapter.add(getString(R.string.error_fragment));
+//        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
+//        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         // set adapter
         setAdapter(mRowsAdapter);
@@ -296,18 +312,26 @@ public class MainFragment extends BrowseFragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
+
                 // Play once
                 getActivity().startActivity(intent);
+
                 // Continue play
 //                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
 
-            } else if (item instanceof String) {
-                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
+            }
+            else if (item instanceof String)
+            {
+//                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
+//                if (((String) item).contains(getString(R.string.error_fragment)))
+                if (((String) item).contains("2nd folder"))
+                {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
                     startActivity(intent);
-                } else {
-                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
-                            .show();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT).show();
                 }
             }
         }

@@ -1,13 +1,16 @@
 package com.test.cw.tvui.operation;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.test.cw.tvui.R;
@@ -18,18 +21,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Import_fromSDCardAct extends ListActivity//ListFragment
+public class Import_fromSDCardAct extends ListActivity
 {
     private List<String> filePathArray = null;
     List<String> fileNames = null;
+    ListView listView;
 
     @Override
     public void onCreate(Bundle bundle) 
     {
         setContentView(R.layout.sd_file_list);
-        System.out.println("Import_fromSDCardAct / _onCreateView ");
+        System.out.println("Import_fromSDCardAct / _onCreate");
         View view = findViewById(R.id.view_back_btn_bg);
         view.setBackgroundColor(ColorSet.getBarColor(this));
+
+        listView = (ListView)findViewById(android.R.id.list);
+        listView.setItemsCanFocus(true);
 
         // back button
         Button backButton = (Button) findViewById(R.id.view_back);
@@ -41,7 +48,6 @@ public class Import_fromSDCardAct extends ListActivity//ListFragment
                 finish();
             }
         });
-
 
         super.onCreate(bundle);
     }
@@ -59,7 +65,8 @@ public class Import_fromSDCardAct extends ListActivity//ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long rowId)
     {
-        int selectedRow = (int)rowId;
+        System.out.println("Import_fromSDCardAct / _onListViewItemClick / position = " + position);
+        int selectedRow = position;
         if(selectedRow == 0)
         {
         	//root
@@ -68,6 +75,7 @@ public class Import_fromSDCardAct extends ListActivity//ListFragment
         else
         {
             final String filePath = filePathArray.get(selectedRow);
+            System.out.println("Import_fromSDCardAct / _onListViewItemClick / filePath = " + filePath);
             final File file = new File(filePath);
             if(file.isDirectory())
             {
@@ -91,12 +99,12 @@ public class Import_fromSDCardAct extends ListActivity//ListFragment
             		String dirString = Environment.getExternalStorageDirectory().toString() +
 					          "/" +
 					          Util.getStorageDirName(this);
-            		getFiles(new File(dirString).listFiles());
+                    getFiles(new File(dirString).listFiles());
             	}
             }
         }
     }
-    
+
     private void getFiles(File[] files)
     {
         if(files == null)
@@ -114,13 +122,49 @@ public class Import_fromSDCardAct extends ListActivity//ListFragment
             
 	        for(File file : files)
 	        {
+                System.out.println("Import_fromSDCardAct / _getFiles / file.getPath() = " + file.getPath());
+                System.out.println("Import_fromSDCardAct / _getFiles / file.getName() = " + file.getName());
                 filePathArray.add(file.getPath());
                 fileNames.add(file.getName());
-	        }
-	        ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
-	        														R.layout.sd_file_list_row,
-	        														fileNames);
+
+            }
+            FilenameAdapter fileList = new FilenameAdapter(this,
+                                                           R.layout.sd_file_list_row,
+                                                           fileNames);
+
 	        setListAdapter(fileList);
         }
+
     }
+
+    // File name array for setting focus and file name
+    class FilenameAdapter extends ArrayAdapter
+    {
+        public FilenameAdapter(Context context,int resource,List objects) {
+            super(context, resource, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView,ViewGroup parent) {
+            if(convertView == null)
+            {
+                convertView = getLayoutInflater().inflate(R.layout.sd_file_list_row, parent, false);
+            }
+
+            convertView.setFocusable(true);
+            convertView.setClickable(true);
+            TextView tv = (TextView)convertView.findViewById(R.id.text1);
+            tv.setText(fileNames.get(position));
+
+            final int item = position;
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onListItemClick(listView,v,item,item);
+                }
+            });
+            return convertView;
+        }
+    }
+
 }
