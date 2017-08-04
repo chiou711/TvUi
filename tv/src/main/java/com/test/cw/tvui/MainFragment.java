@@ -49,6 +49,7 @@ import android.widget.Toast;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.operation.Import_fileListAct;
+import com.test.cw.tvui.operation.Import_fileViewAct;
 
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
@@ -78,6 +79,9 @@ public class MainFragment extends BrowseFragment {
 //        prepareBackgroundManager();
 
         setupUIElements();
+
+        // set true at Import runtime
+        Import_fileViewAct.isAddingNewFolder = false;
 
         // dialog for Continue loading
         isNew = !Util.getPref_has_default_import(MainActivity.mAct,0);
@@ -213,8 +217,10 @@ public class MainFragment extends BrowseFragment {
 
     private void setupEventListeners() {
         System.out.println("_setupEventListeners");
-        setOnSearchClickedListener(new View.OnClickListener() {
 
+        // Search Click
+        setOnSearchClickedListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View view) {
 //                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG).show();

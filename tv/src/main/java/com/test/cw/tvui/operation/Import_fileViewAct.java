@@ -27,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.test.cw.tvui.MainFragment;
 import com.test.cw.tvui.R;
 import com.test.cw.tvui.ColorSet;
 import com.test.cw.tvui.Util;
@@ -45,6 +46,7 @@ public class Import_fileViewAct extends Activity
     static File mFile;
     FileInputStream fileInputStream = null;
     View mViewFile,mViewFileProgressBar;
+    public static boolean isAddingNewFolder = true;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState)
@@ -136,6 +138,7 @@ public class Import_fileViewAct extends Activity
 
 			public void onClick(View view)
 			{
+                isAddingNewFolder = true;
 				ProgressBar progressBar = (ProgressBar) findViewById(R.id.import_progress);
 				ImportAsyncTask confirmTask = new ImportAsyncTask();
 				confirmTask.setProgressBar(progressBar);
@@ -146,8 +149,9 @@ public class Import_fileViewAct extends Activity
     }
 
     static ParseXmlToDB parser;
-    private void insertSelectedFileContentToDB(boolean enableInsertDB) 
+    private void insertViewContentToDB(boolean enableInsertDB)
     {
+		System.out.println("Import_fileViewAct / _insertViewContentToDB / MainFragment.isNew = " + MainFragment.isNew);
 		extras = getIntent().getExtras();
     	mFile = new File(extras.getString("FILE_PATH"));
     	
@@ -234,7 +238,7 @@ public class Import_fileViewAct extends Activity
 		@Override
 		protected Void doInBackground(Void... params) 
 		{
-			insertSelectedFileContentToDB(enableSaveDB);
+			insertViewContentToDB(enableSaveDB);
 			return null;
 		}
 		

@@ -83,14 +83,17 @@ public class ParseXmlToDB {
         DB_folder.setFocusFolder_tableId(folderTableId);
 
         // last page table Id
-        int lastPageTableId;
-        if(MainFragment.isNew)
+        int lastPageTableId = 0;
+        if(MainFragment.isNew && !Import_fileViewAct.isAddingNewFolder ) {
             lastPageTableId = 0;
-        else {
+        }
+        else if(!MainFragment.isNew ||Import_fileViewAct.isAddingNewFolder )
+        {
             mDb_folder.open();
             lastPageTableId = mDb_folder.getPagesCount(false);
             mDb_folder.close();
         }
+
 
         try
         {
@@ -129,8 +132,9 @@ public class ParseXmlToDB {
                                                                 lastPageTableId,
                                                                 style );
                             System.out.println("insertedPageId = " + insertedPageId);
+                            System.out.println("lastPageTableId = " + lastPageTableId);
 
-                            // insert table for new tab
+                            // insert new page table
                             mDb_folder.insertPageTable(mDb_folder,folderTableId, lastPageTableId, false );
                         }
 
@@ -159,15 +163,21 @@ public class ParseXmlToDB {
 	            	    link = text.trim();
 	            	    if(mEnableInsertDB)
 	            	    {
-		            	    DB_page.setFocusPage_tableId(lastPageTableId);//TabsHost.getLastExist_TabId());
+		            	    DB_page.setFocusPage_tableId(lastPageTableId);
 						    //Add links
 		            	    if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
 		            	    {
-                                title = Util.getYouTubeTitle(link);
-                                if((!Util.isEmptyString(picture)) || (!Util.isEmptyString(audio)))
-                                    mDb_page.insertNote(title, picture, audio, "", link, body,1, (long) 0); // add mark for media
-                                else
-                                    mDb_page.insertNote(title, picture, audio, "", link, body,0, (long) 0);
+                                // apply title for saving time
+                                if(Util.isEmptyString(title))
+                                    title = Util.getYouTubeTitle(link);
+
+//                                if((!Util.isEmptyString(picture)) || (!Util.isEmptyString(audio)))
+//                                    mDb_page.insertNote(title, picture, audio, "", link, body,1, (long) 0); // add mark for media
+//                                else
+                                long returnedNoteId = mDb_page.insertNote(title, picture, audio, "", link, body,0, (long) 0);
+                                System.out.println("just insert note: returnedNoteId = " + returnedNoteId +
+                                                    ", title = " + title +
+                                                    ", link = " + link        );
 		            	    }
 	            	    }
 		                fileBody = fileBody.concat(Util.NEW_LINE + strSplitter);
@@ -184,15 +194,20 @@ public class ParseXmlToDB {
             }
 //            System.out.println("ParseXmlToDB / _parseXMLAndInsertDB / fileBody = " + fileBody);
 
-            // parse finished
+            // parse finished, set flags
             isParsing = false;
-            if(DB_folder.getFocusFolder_tableId() == Define.ORIGIN_FOLDERS_COUNT) {
+            if(MainFragment.isNew &&
+               DB_folder.getFocusFolder_tableId() == Define.ORIGIN_FOLDERS_COUNT)
+            {
                 MainFragment.isNew = false;
                 // set preference
                 Util.setPref_has_default_import(MainActivity.mAct,true,0);
             }
             else
                 MainFragment.isNew = true;
+
+            if(Import_fileViewAct.isAddingNewFolder)
+                Import_fileViewAct.isAddingNewFolder = false;
 
             if(MainFragment.alertDlg != null)
                 MainFragment.alertDlg.dismiss();
