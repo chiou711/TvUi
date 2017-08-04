@@ -7,6 +7,7 @@ import com.test.cw.tvui.MainFragment;
 import com.test.cw.tvui.Util;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
+import com.test.cw.tvui.preference.Define;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -14,7 +15,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-public class ParseStreamToDB {
+public class ParseXmlToDB {
 
     private String pageName,title,body,picture,audio,link;
     private FileInputStream fileInputStream = null;
@@ -25,15 +26,21 @@ public class ParseStreamToDB {
     private DB_folder mDb_folder;
     private DB_page mDb_page;
 
-    public ParseStreamToDB(Context context, FileInputStream fileInputStream)
+    // constructor
+    public ParseXmlToDB(Context context, FileInputStream fileInputStream)
     {
 	    this.fileInputStream = fileInputStream;
 
-	    int folderTableId = 1;//Util.getPref_lastTimeView_folder_tableId(mContext);
-	    mDb_folder = new DB_folder(MainActivity.mAct, folderTableId);
+	    int folderTableId = DB_folder.getFocusFolder_tableId();//Util.getPref_lastTimeView_folder_tableId(mContext);
+	    mDb_folder = new DB_folder(context, folderTableId);
 
 	    int pageTableId = 1;//Util.getPref_lastTimeView_page_tableId(mContext);
-	    mDb_page = new DB_page(MainActivity.mAct,pageTableId);
+	    mDb_page = new DB_page(context,pageTableId);
+    }
+
+    public void enableSaveDB(boolean en)
+    {
+        mEnableInsertDB = en;
     }
 
     public String getTitle()
@@ -41,12 +48,39 @@ public class ParseStreamToDB {
       return title;
    }
 
-
-    public void parseXMLAndInsertDB(XmlPullParser myParser)
+    // thread to start parsing
+    public void startParseThread(final int folderTableId)
     {
+        Thread thread = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    InputStream stream = fileInputStream;
+                    final int folder_table_id = folderTableId;
+                    XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                    parser.setInput(stream, null);
+                    parseXML(parser,folder_table_id);
+                    stream.close();
+                }
+                catch (Exception e)
+                { }
+            }
+        });
+        thread.start();
+    }
 
+    // parse XML
+    public void parseXML(XmlPullParser parser, int folderTableId)
+    {
+        System.out.println("ParseXmlToDB / _parseXMLAndInsertDB / folderTableId = " + folderTableId);
         int event;
         String text=null;
+
+        DB_folder.setFocusFolder_tableId(folderTableId);
 
         // last page table Id
         int lastPageTableId;
@@ -60,10 +94,10 @@ public class ParseStreamToDB {
 
         try
         {
-            event = myParser.getEventType();
+            event = parser.getEventType();
             while (event != XmlPullParser.END_DOCUMENT)
             {
-        	    String name = myParser.getName(); //name: null, link, item, title, description
+        	    String name = parser.getName(); //name: null, link, item, title, description
         	    switch (event)
 	            {
 	                case XmlPullParser.START_TAG:
@@ -74,7 +108,7 @@ public class ParseStreamToDB {
 		            break;
 
 	            case XmlPullParser.TEXT:
-			       text = myParser.getText();
+			       text = parser.getText();
 	            break;
 
 	            case XmlPullParser.END_TAG:
@@ -82,22 +116,22 @@ public class ParseStreamToDB {
 		            {
 	                    pageName = text.trim();
 
-					    //TODO add page
+					    //Add page
                         if(mEnableInsertDB)
                         {
-                            int style = 0;//Util.getNewPageStyle(mContext);
                             lastPageTableId++;
-
                             DB_page.setFocusPage_tableId(lastPageTableId);
+
                             // style is not set in XML file, so insert default style instead
-                            long retId = mDb_folder.insertPage(DB_folder.getFocusFolder_tableName(),
-                                    pageName,
-                                    lastPageTableId,
-                                    style );
-                            System.out.println("retId = " + retId);
+                            int style = 0;
+                            long insertedPageId = mDb_folder.insertPage(DB_folder.getFocusFolder_tableName(),
+                                                                pageName,
+                                                                lastPageTableId,
+                                                                style );
+                            System.out.println("insertedPageId = " + insertedPageId);
 
                             // insert table for new tab
-                            mDb_folder.insertPageTable(mDb_folder,1, lastPageTableId, false );//TODO drawerId = 1
+                            mDb_folder.insertPageTable(mDb_folder,folderTableId, lastPageTableId, false );
                         }
 
 		        	    fileBody = fileBody.concat(Util.NEW_LINE + "=== " + "Page:" + " " + pageName + " ===");
@@ -126,7 +160,7 @@ public class ParseStreamToDB {
 	            	    if(mEnableInsertDB)
 	            	    {
 		            	    DB_page.setFocusPage_tableId(lastPageTableId);//TabsHost.getLastExist_TabId());
-						    //TODO add links
+						    //Add links
 		            	    if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
 		            	    {
                                 title = Util.getYouTubeTitle(link);
@@ -146,17 +180,22 @@ public class ParseStreamToDB {
 	                }
 	                break;
 	            }
-        	    event = myParser.next();
+        	    event = parser.next();
             }
-            System.out.println("parseXMLAndInsertDB / fileBody = " + fileBody);
+//            System.out.println("ParseXmlToDB / _parseXMLAndInsertDB / fileBody = " + fileBody);
 
             // parse finished
             isParsing = false;
-            MainFragment.isNew = false;
+            if(DB_folder.getFocusFolder_tableId() == Define.ORIGIN_FOLDERS_COUNT) {
+                MainFragment.isNew = false;
+                // set preference
+                Util.setPref_has_default_import(MainActivity.mAct,true,0);
+            }
+            else
+                MainFragment.isNew = true;
+
             if(MainFragment.alertDlg != null)
                 MainFragment.alertDlg.dismiss();
-            // set preference
-            Util.setPref_has_default_import(MainActivity.mAct,true,0);
         }
         catch (Exception e)
         {
@@ -164,31 +203,4 @@ public class ParseStreamToDB {
         }
     }
 
-    public void handleXML()
-    {
-	    Thread thread = new Thread(new Runnable()
-	    {
-		    @Override
-		    public void run()
-		    {
-                try
-                {
-                    InputStream stream = fileInputStream;
-                    XmlPullParser myParser = XmlPullParserFactory.newInstance().newPullParser();
-                    myParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-                    myParser.setInput(stream, null);
-                    parseXMLAndInsertDB(myParser);
-                    stream.close();
-                }
-                catch (Exception e)
-                { }
-            }
-        });
-	    thread.start();
-    }
-   
-    public void enableInsertDB(boolean en)
-   {
-	   mEnableInsertDB = en;
-   }
 }

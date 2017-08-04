@@ -36,8 +36,8 @@
         <activity android:name=".DetailsActivity"/>
         <activity android:name=".PlaybackOverlayActivity"/>
         <activity android:name=".BrowseErrorActivity"/>
-        <activity android:name=".operation.Import_fromSDCardAct"/>
-        <activity android:name=".operation.Import_selectedFileAct"/>
+        <activity android:name=".operation.Import_fileListAct"/>
+        <activity android:name=".operation.Import_fileViewAct"/>
     </application>
 
 </manifest>

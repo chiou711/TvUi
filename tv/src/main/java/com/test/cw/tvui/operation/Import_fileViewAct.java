@@ -30,12 +30,13 @@ import android.widget.Toast;
 import com.test.cw.tvui.R;
 import com.test.cw.tvui.ColorSet;
 import com.test.cw.tvui.Util;
+import com.test.cw.tvui.db.DB_folder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-public class Import_selectedFileAct extends Activity 
+public class Import_fileViewAct extends Activity
 {
 
     private TextView mTitleViewText;
@@ -49,7 +50,7 @@ public class Import_selectedFileAct extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-    	System.out.println("Import_selectedFileAct / onCreate");
+    	System.out.println("Import_fileViewAct / onCreate");
 
         setContentView(R.layout.view_file);
         mViewFile = findViewById(R.id.view_file);
@@ -62,17 +63,17 @@ public class Import_selectedFileAct extends Activity
 
 		ProgressBar progressBar = (ProgressBar) findViewById(R.id.import_progress);
 		if(savedInstanceState == null) {
-			ImportAsyncTask task = new ImportAsyncTask();
-			task.setProgressBar(progressBar);
-			task.enableSaveDB(false);
-			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);//mFile is created inside ImportAsyncTask / _insertSelectedFileContentToDB
+			ImportAsyncTask viewTask = new ImportAsyncTask();
+			viewTask.setProgressBar(progressBar);
+			viewTask.enableSaveDB(false);
+			viewTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 		else
 		{
 			extras = getIntent().getExtras();
 			mFile = new File(extras.getString("FILE_PATH"));
 			mTitleViewText.setText(mFile.getName());
-			mBodyViewText.setText(importObject.fileBody);
+			mBodyViewText.setText(parser.fileBody);
 		}
 
 		int style = 2;
@@ -107,10 +108,7 @@ public class Import_selectedFileAct extends Activity
 
 			public void onClick(View view)
 			{
-				Util util = new Util(Import_selectedFileAct.this);
-//				util.vibrate();
-
-				AlertDialog.Builder builder1 = new AlertDialog.Builder(Import_selectedFileAct.this);
+				AlertDialog.Builder builder1 = new AlertDialog.Builder(Import_fileViewAct.this);
 				builder1.setTitle("Confirmation")
 						.setMessage("Do you want to delete this file?" +
 									" (" + mFile.getName() +")" )
@@ -139,15 +137,15 @@ public class Import_selectedFileAct extends Activity
 			public void onClick(View view)
 			{
 				ProgressBar progressBar = (ProgressBar) findViewById(R.id.import_progress);
-				ImportAsyncTask task = new ImportAsyncTask();
-				task.setProgressBar(progressBar);
-				task.enableSaveDB(true);
-				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				ImportAsyncTask confirmTask = new ImportAsyncTask();
+				confirmTask.setProgressBar(progressBar);
+				confirmTask.enableSaveDB(true);
+				confirmTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		});
     }
 
-    static ParseStreamToDB importObject;
+    static ParseXmlToDB parser;
     private void insertSelectedFileContentToDB(boolean enableInsertDB) 
     {
 		extras = getIntent().getExtras();
@@ -163,16 +161,16 @@ public class Import_selectedFileAct extends Activity
     	}
 		 
     	// import data by HandleXmlByFile class
-    	importObject = new ParseStreamToDB(this,fileInputStream);
-    	importObject.enableInsertDB(enableInsertDB);
-    	importObject.handleXML();
-    	while(importObject.isParsing);
+    	parser = new ParseXmlToDB(this,fileInputStream);
+    	parser.enableSaveDB(enableInsertDB);
+    	parser.startParseThread(DB_folder.getFocusFolder_tableId());
+    	while(parser.isParsing);
     }
     
-    public static void createDefaultTables(Activity act,String fileName)
+    public static void createDefaultTables(Activity act,int folderTableId)
     {
-		System.out.println("Import_selectedFileAct / _createDefaultTables / fileName = " + fileName);
-
+		String fileName = "default" + String.valueOf(folderTableId)+".xml";
+		System.out.println("Import_fileViewAct / _createDefaultTables / fileName = " + fileName);
         FileInputStream fileInputStream = null;
         File assetsFile = Util.createAssetsFile(act,fileName);
         try
@@ -184,11 +182,11 @@ public class Import_selectedFileAct extends Activity
             e.printStackTrace();
         }
 
-        // import data by ParseStreamToDB class
-        importObject = new ParseStreamToDB(act,fileInputStream);
-        importObject.enableInsertDB(true);
-        importObject.handleXML();
-        while(importObject.isParsing);
+        // import data by ParseXmlToDB class
+        parser = new ParseXmlToDB(act,fileInputStream);
+        parser.enableSaveDB(true);
+        parser.startParseThread(folderTableId);
+        while(parser.isParsing);
 	}
 
     @Override
@@ -213,7 +211,7 @@ public class Import_selectedFileAct extends Activity
 		boolean enableSaveDB;
 		public void setProgressBar(ProgressBar bar) {
 //			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-//			Util.lockOrientation(Import_selectedFileAct.this);
+//			Util.lockOrientation(Import_fileViewAct.this);
 			this.bar = bar;
 		    mViewFile.setVisibility(View.GONE);
 		    mViewFileProgressBar.setVisibility(View.VISIBLE);
@@ -250,14 +248,14 @@ public class Import_selectedFileAct extends Activity
 			{
 				finish();
 //				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-//				Util.unlockOrientation(Import_selectedFileAct.this);
-				Toast.makeText(Import_selectedFileAct.this,"Import finished",Toast.LENGTH_SHORT).show();
+//				Util.unlockOrientation(Import_fileViewAct.this);
+				Toast.makeText(Import_fileViewAct.this,"Import finished",Toast.LENGTH_SHORT).show();
 			}
 			else
 			{
 			    // show Import content
 		    	mTitleViewText.setText(mFile.getName());
-		    	mBodyViewText.setText(importObject.fileBody);
+		    	mBodyViewText.setText(parser.fileBody);
 			}
 		}
 	}    

@@ -14,9 +14,6 @@
 
 package com.test.cw.tvui;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 import java.util.Timer;
@@ -51,7 +48,7 @@ import android.widget.Toast;
 
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
-import com.test.cw.tvui.operation.Import_fromSDCardAct;
+import com.test.cw.tvui.operation.Import_fileListAct;
 
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
@@ -96,14 +93,14 @@ public class MainFragment extends BrowseFragment {
             alertDlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    loadItemsByDB();
+                    loadItemsByDB(1);
                     setupEventListeners();
                 }
             });
         }
         else
         {
-            loadItemsByDB();
+            loadItemsByDB(1);
             setupEventListeners();
         }
     }
@@ -126,9 +123,9 @@ public class MainFragment extends BrowseFragment {
     }
 
     // load items by DB
-    private void loadItemsByDB()
+    private void loadItemsByDB(int folderTableId)
     {
-        System.out.println("_loadItemsByDB");
+        System.out.println("MainFragment / _loadItemsByDB / folderTableId = " + folderTableId);
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
         CardPresenter cardPresenter = new CardPresenter();
@@ -137,29 +134,26 @@ public class MainFragment extends BrowseFragment {
         // prepare items
         int countRows = 0;
 
-        ///
         // other
-        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
+        HeaderItem gridHeader = new HeaderItem(countRows, "Folders");
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-//        gridRowAdapter.add(getResources().getString(R.string.grid_view));
-//        gridRowAdapter.add(getString(R.string.error_fragment));
-//        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
-        gridRowAdapter.add("1st folder");
-        gridRowAdapter.add("2nd folder");
-        gridRowAdapter.add("3rd folder");
+        gridRowAdapter.add("1st");
+        gridRowAdapter.add("2nd");
+        gridRowAdapter.add("3rd");
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
-        ///
 
 
         // Only one folder, default folder table id = 1
-        DB_folder db_folder = new DB_folder(getActivity(),1);
-        int pagesCount = db_folder.getPagesCount(true);
+        DB_folder db_folder = new DB_folder(getActivity(),folderTableId);
+        db_folder.open();
+        int pagesCount = db_folder.getPagesCount(false);
+        System.out.println("MainFragment / _loadItemsByDB / pagesCount = " + pagesCount);
+        db_folder.close();
 
         for(int i = 0; i< pagesCount; i++)
         {
-            //TODO page
-            db_folder = new DB_folder(getActivity(),1);
+            // Page
             String pageTitle = db_folder.getPageTitle(i,true);
 
             List<Movie> list = MovieList.setupMoviesByDB(i);
@@ -177,27 +171,18 @@ public class MainFragment extends BrowseFragment {
             DB_page db_page = new DB_page(getActivity(),pageTableId);
             db_page.open();
             int linkCount = db_page.getNotesCount(false);
+            db_page.close();
+
             for(int j = 0; j<linkCount ; j++)
             {
-                //TODO links
-                String link = db_page.getNoteLinkUri(j,false);
+                String link = db_page.getNoteLinkUri(j,true);
                 listRowAdapter.add(list.get(j));
                 // verify
                 System.out.println("MainFragment / _loadItemsByDB / link = " + link);
             }
-            db_page.close();
 
             countRows++;
         }
-
-        // other
-//        HeaderItem gridHeader = new HeaderItem(countRows, "PREFERENCES");
-//        GridItemPresenter mGridPresenter = new GridItemPresenter();
-//        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-//        gridRowAdapter.add(getResources().getString(R.string.grid_view));
-//        gridRowAdapter.add(getString(R.string.error_fragment));
-//        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
-//        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         // set adapter
         setAdapter(mRowsAdapter);
@@ -233,7 +218,7 @@ public class MainFragment extends BrowseFragment {
             @Override
             public void onClick(View view) {
 //                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getActivity(), Import_fromSDCardAct.class);
+                Intent intent = new Intent(getActivity(), Import_fileListAct.class);
                 startActivity(intent);
             }
         });
@@ -287,7 +272,7 @@ public class MainFragment extends BrowseFragment {
 //                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 //                getActivity().startActivity(intent, bundle);
 
-                //TODO: launch YouTube by item view click
+                //Launch YouTube by item view click
                 currPageId = (int)row.getId();
                 currLinkId = (int)movie.getId();
                 // get real link Id in row
@@ -300,10 +285,10 @@ public class MainFragment extends BrowseFragment {
                     DB_page db_page = new DB_page(MainActivity.mAct,page_table);
                     db_page.open();
                     int length = db_page.getNotesCount(false);
+                    db_page.close();
                     System.out.println("MainFragment / _onItemClicked / length ("+i+")= "+ length);
 
                     currLinkId -= length;
-                    db_page.close();
                 }
                 System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
                 System.out.println("MainFragment / _onItemClicked / currLinkId = "+ currLinkId);
@@ -324,10 +309,17 @@ public class MainFragment extends BrowseFragment {
             {
 //                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
 //                if (((String) item).contains(getString(R.string.error_fragment)))
-                if (((String) item).contains("2nd folder"))
+                if (((String) item).contains("1st"))
                 {
-                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
-                    startActivity(intent);
+//                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
+//                    startActivity(intent);
+                    loadItemsByDB(1);
+//                    setupEventListeners();
+                }
+                else if (((String) item).contains("2nd"))
+                {
+                    loadItemsByDB(2);
+//                    setupEventListeners();
                 }
                 else
                 {

@@ -1,5 +1,6 @@
 package com.test.cw.tvui;
 
+import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 
 import java.util.ArrayList;
@@ -9,9 +10,11 @@ import java.util.List;
 public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
     static List<Movie> list;
-    static List<Movie> setupMoviesByDB(int pageNo)
+    static List<Movie> setupMoviesByDB(int pagePosition)
     {
-        int pageTableId = pageNo + 1;
+        int pageTableId;
+        DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
+        pageTableId = db_folder.getPageTableId(pagePosition,true);
         list = new ArrayList<>();
 
         // description

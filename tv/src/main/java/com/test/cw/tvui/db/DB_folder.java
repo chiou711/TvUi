@@ -33,9 +33,6 @@ public class DB_folder
     static final String KEY_PAGE_STYLE = "page_style";
     static final String KEY_PAGE_CREATED = "page_created";
 
-	// DB
-    DB_folder mDb_folder;
-
 	// Cursor
 	static Cursor mCursor_page;
 
@@ -62,7 +59,7 @@ public class DB_folder
 
         try
         {
-            mCursor_page = this.getPageCursor_byFolderTableId(1);
+            mCursor_page = this.getPageCursor_byFolderTableId(getFocusFolder_tableId());
 
             // since no page is created in com.test.cw.tvui.folder table, delete the com.test.cw.tvui.folder Id
             // but this is not for importing preference condition
@@ -83,7 +80,7 @@ public class DB_folder
         }
         catch (Exception e)
         {
-//            System.out.println("DB_folder / open com.test.cw.tvui.folder table NG! / table id = " + getFocusFolder_tableId());
+            System.out.println("DB_folder / open com.test.cw.tvui.folder table NG! / table id = " + getFocusFolder_tableId());
 //            DB_drawer db_drawer = new DB_drawer(mContext);
 //            int folderId =  (int) db_drawer.getFolderId(0);//MainAct.mFocus_folderPos);
 //            // since the com.test.cw.tvui.folder table does not exist, delete the com.test.cw.tvui.folder Id in drawer table
@@ -104,13 +101,13 @@ public class DB_folder
     // 1 SQLiteDatabase
     // 2 assigned drawer Id
     // 3 page table Id
-    public void insertPageTable(DB_folder db, int drawerId, int pageId, boolean is_SQLiteOpenHelper_onCreate)
+    public void insertPageTable(DB_folder db, int folderId, int pageId, boolean is_SQLiteOpenHelper_onCreate)
     {   
     	if(!is_SQLiteOpenHelper_onCreate)
     		db.open();
 
         //format "Page1_2"
-    	DB_PAGE_TABLE_NAME = DB_PAGE_TABLE_PREFIX.concat(String.valueOf(drawerId)+
+    	DB_PAGE_TABLE_NAME = DB_PAGE_TABLE_PREFIX.concat(String.valueOf(folderId)+
     														"_"+
     														String.valueOf(pageId));
         String dB_insert_table = "CREATE TABLE IF NOT EXISTS " + DB_PAGE_TABLE_NAME + "(" +
@@ -356,8 +353,9 @@ public class DB_folder
     public static void setFocusFolder_tableId(int i)
     {
     	mTableId_folder = i;
+        System.out.println("DB_folder / _setFocusFolder_tableId / mTableId_folder = " + mTableId_folder);
     }
-    
+
     public static int getFocusFolder_tableId()
     {
     	return mTableId_folder;

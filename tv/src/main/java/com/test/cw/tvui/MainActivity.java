@@ -25,19 +25,18 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.test.cw.tvui.db.DB_drawer;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.folder.Folder;
-import com.test.cw.tvui.operation.Import_selectedFileAct;
+import com.test.cw.tvui.operation.Import_fileViewAct;
 import com.test.cw.tvui.preference.Define;
 
 /*
  * MainActivity class that loads MainFragment
  */
 public class MainActivity extends Activity {
-//    public static DB_drawer mDb_drawer;
-    public static DB_folder mDb_folder;
-    public DB_page mDb_page;
+    public DB_drawer mDb_drawer;
     /**
      * Called when the activity is first created.
      */
@@ -66,6 +65,12 @@ public class MainActivity extends Activity {
                                                   new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                                                 Manifest.permission.READ_EXTERNAL_STORAGE  },
                                                   PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
+            else
+            {
+                final boolean ENABLE_DB_CHECK = true;//true;//false
+                if(ENABLE_DB_CHECK)
+                    Folder.listAllPageTables(mAct);
             }
         }
         else
@@ -148,26 +153,27 @@ public class MainActivity extends Activity {
     void createDB_data()
     {
         // init DB
-        mDb_folder = new DB_folder(context, 1);//folderTableId);
-        mDb_page = new DB_page(context,1);//pageTableId);
+        mDb_drawer = new DB_drawer(context);
 
-        final boolean ENABLE_DB_CHECK = false;//true;//false
-        if(ENABLE_DB_CHECK)
-            Folder.listAllPageTables(mAct);
+        // for creating folder tables
+//        if(!Util.getPref_has_default_import(mAct,0)) {
+//            mDb_drawer.open();
+//            mDb_drawer.close();
+//        }
 
         if(Define.HAS_PREFERENCE)
         {
             // Check preference and Create default tables
-            if( !Util.getPref_has_default_import(MainActivity.mAct,0) )
+            if( !Util.getPref_has_default_import(mAct,0) )
             {
-                MainFragment.isNew = true;
-                String fileName = "default1.xml";
+                for(int i=1;i<=Define.ORIGIN_FOLDERS_COUNT;i++)
+                {
+                    MainFragment.isNew = true;
+                    DB_folder.setFocusFolder_tableId(i);
 
-                int folderTableId = 1;
-                DB_folder.setFocusFolder_tableId(folderTableId);
-
-                // import default tables
-                Import_selectedFileAct.createDefaultTables(mAct,fileName);
+                    // import default tables
+                    Import_fileViewAct.createDefaultTables(mAct, i);
+                }
             }
             else
                 MainFragment.isNew = false;

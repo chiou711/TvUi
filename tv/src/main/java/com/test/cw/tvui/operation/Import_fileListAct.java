@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Import_fromSDCardAct extends ListActivity
+public class Import_fileListAct extends ListActivity
 {
     private List<String> filePathArray = null;
     List<String> fileNames = null;
@@ -31,7 +31,7 @@ public class Import_fromSDCardAct extends ListActivity
     public void onCreate(Bundle bundle) 
     {
         setContentView(R.layout.sd_file_list);
-        System.out.println("Import_fromSDCardAct / _onCreate");
+        System.out.println("Import_fileListAct / _onCreate");
         View view = findViewById(R.id.view_back_btn_bg);
         view.setBackgroundColor(ColorSet.getBarColor(this));
 
@@ -65,7 +65,7 @@ public class Import_fromSDCardAct extends ListActivity
     @Override
     public void onListItemClick(ListView l, View v, int position, long rowId)
     {
-        System.out.println("Import_fromSDCardAct / _onListViewItemClick / position = " + position);
+        System.out.println("Import_fileListAct / _onListViewItemClick / position = " + position);
         int selectedRow = position;
         if(selectedRow == 0)
         {
@@ -75,7 +75,7 @@ public class Import_fromSDCardAct extends ListActivity
         else
         {
             final String filePath = filePathArray.get(selectedRow);
-            System.out.println("Import_fromSDCardAct / _onListViewItemClick / filePath = " + filePath);
+            System.out.println("Import_fileListAct / _onListViewItemClick / filePath = " + filePath);
             final File file = new File(filePath);
             if(file.isDirectory())
             {
@@ -89,7 +89,7 @@ public class Import_fromSDCardAct extends ListActivity
                    (file.getName().contains("XML") ||
                     file.getName().contains("xml")     ))
             	{
-		           	Intent i = new Intent(this, Import_selectedFileAct.class);
+		           	Intent i = new Intent(this, Import_fileViewAct.class);
 		           	i.putExtra("FILE_PATH", filePath);
 		           	startActivity(i);
             	}
@@ -122,8 +122,8 @@ public class Import_fromSDCardAct extends ListActivity
             
 	        for(File file : files)
 	        {
-                System.out.println("Import_fromSDCardAct / _getFiles / file.getPath() = " + file.getPath());
-                System.out.println("Import_fromSDCardAct / _getFiles / file.getName() = " + file.getName());
+                System.out.println("Import_fileListAct / _getFiles / file.getPath() = " + file.getPath());
+                System.out.println("Import_fileListAct / _getFiles / file.getName() = " + file.getName());
                 filePathArray.add(file.getPath());
                 fileNames.add(file.getName());
 

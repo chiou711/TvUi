@@ -2,13 +2,13 @@ package com.test.cw.tvui.folder;
 
 import android.app.Activity;
 
-import com.test.cw.tvui.MainActivity;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
+import com.test.cw.tvui.preference.Define;
 
 
 /**
- * Created by CW on 2016/8/23.
+ * Created by CW on 2017/8/4.
  */
 public class Folder
 {
@@ -37,34 +37,39 @@ public class Folder
 //            System.out.println("--- com.test.cw.tvui.folder table Id = " + folderTableId +
 //                               ", com.test.cw.tvui.folder title = " + folderTitle);
 
-            DB_folder db_folder = new DB_folder(act,1);//folderTableId);
-
-            int pagesCount = db_folder.getPagesCount(true);
-
-            for(int pagePos=0; pagePos<pagesCount; pagePos++)
+            for(int i=1;i<= Define.ORIGIN_FOLDERS_COUNT;i++)
             {
-//                TabsHost.mNow_pageId = pagePos;
-                int pageId = db_folder.getPageId(pagePos, true);
-                int pageTableId = db_folder.getPageTableId(pagePos, true);
-                String pageTitle = db_folder.getPageTitle(pagePos, true);
-                System.out.println("   --- page Id = " + pageId);
-                System.out.println("   --- page table Id = " + pageTableId);
-                System.out.println("   --- page title = " + pageTitle);
+                System.out.println("--- folder table Id = " + i );
+                DB_folder db_folder = new DB_folder(act, i);//folderTableId);
+//                DB_folder.setFocusFolder_tableId(i);
+                db_folder.open();
+                int pagesCount = db_folder.getPagesCount(false);
+                db_folder.close();
 
-//                MainActivity.mLastOkTabId = pageId;
+                System.out.println("--- pagesCount = " + pagesCount );
 
-                try {
-                    DB_page db_page = new DB_page(act,pageTableId);
-                    db_page.open();
-                    int note_count = db_page.getNotesCount(false);
-                    for(int i=0;i<note_count;i++)
-                    {
-                        String link = db_page.getNoteLinkUri(i,false);
-                        System.out.println("   ------ note link = " + link);
+                for (int pagePos = 0; pagePos < pagesCount; pagePos++)
+                {
+                    int pageId = db_folder.getPageId(pagePos, true);
+                    int pageTableId = db_folder.getPageTableId(pagePos, true);
+                    String pageTitle = db_folder.getPageTitle(pagePos, true);
+                    System.out.println("   --- page Id = " + pageId);
+                    System.out.println("   --- page table Id = " + pageTableId);
+                    System.out.println("   --- page title = " + pageTitle);
+
+
+                    try {
+                        DB_page db_page = new DB_page(act, pageTableId);
+                        db_page.open();
+                        int note_count = db_page.getNotesCount(false);
+                        for (int cnt = 0; cnt < note_count; cnt++) {
+                            String link = db_page.getNoteLinkUri(cnt, false);
+                            System.out.println("   ------ note link = " + link);
+                        }
+
+                        db_page.close();
+                    } catch (Exception e) {
                     }
-
-                    db_page.close();
-                } catch (Exception e) {
                 }
             }
         }

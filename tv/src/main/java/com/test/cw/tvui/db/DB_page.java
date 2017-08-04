@@ -77,9 +77,9 @@ public class DB_page
 //			// since the page table does not exist, delete the tab in com.test.cw.tvui.folder table
 //			System.out.println("   getFocusFolder_tableName() = " + getFocusFolder_tableName());
 //			System.out.println("   TabsHost.mCurrentTabIndex = " + TabsHost.mNow_pageId);
-//			deletePage( TabsHost.mNow_pageId, MainAct.mAct);
+//			deletePage( TabsHost.mNow_pageId, MainActivity.mAct);
 //
-//			DB_drawer db_drawer = new DB_drawer(MainAct.mAct);
+//			DB_drawer db_drawer = new DB_drawer(MainActivity.mAct);
 //			db_drawer.open();
 //			// find a new one last view page table, if pager table dose not exist
 //			int foldersCount = db_drawer.mCursor_folder.getCount();// db_drawer.getFoldersCount();
@@ -91,9 +91,9 @@ public class DB_page
 //					int folder_tableId = db_drawer.getFolderTableId(folderPos);
 //					System.out.println("DB_page / folder_tableId = " + folder_tableId);
 //					DB_folder.setFocusFolder_tableId(folder_tableId);
-//					Util.setPref_lastTimeView_folder_tableId(MainAct.mAct, folder_tableId);
+//					Util.setPref_lastTimeView_folder_tableId(MainActivity.mAct, folder_tableId);
 //
-//					DB_folder db_folder = new DB_folder(MainAct.mAct,Util.getPref_lastTimeView_folder_tableId(MainAct.mAct));
+//					DB_folder db_folder = new DB_folder(MainActivity.mAct,Util.getPref_lastTimeView_folder_tableId(MainActivity.mAct));
 //					db_folder.open();
 //					int pagesCount = db_folder.mCursor_page.getCount();//db_folder.getPagesCount(true);
 //					for(int pagePos=0; pagePos < pagesCount; pagePos++)
@@ -103,11 +103,11 @@ public class DB_page
 //							int page_tableId = db_folder.getPageTableId(pagePos,true);
 //							System.out.println("DB_page / find pageTableId = " + page_tableId);
 //							setFocusPage_tableId(page_tableId);
-//							Util.setPref_lastTimeView_page_tableId(MainAct.mAct, page_tableId);
+//							Util.setPref_lastTimeView_page_tableId(MainActivity.mAct, page_tableId);
 //							db_folder.close();
 //							db_drawer.close();
 //
-//							MainAct.mAct.recreate();
+//							MainActivity.mAct.recreate();
 //							return DB_page.this;
 //						}
 //					}//for

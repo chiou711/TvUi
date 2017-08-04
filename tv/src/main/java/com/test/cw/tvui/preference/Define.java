@@ -38,7 +38,7 @@ public class Define {
 
     // default table count
     public static int ORIGIN_PAGES_COUNT = 1;//5; // Page1_1, Page1_2, Page1_3, Page1_4, Page1_5
-    public static int ORIGIN_FOLDERS_COUNT = 1;  // Folder1, Folder2, Folder3
+    public static int ORIGIN_FOLDERS_COUNT =2;//2;  // Folder1, Folder2, Folder3
 
     // default style
     public static int STYLE_DEFAULT = 1;

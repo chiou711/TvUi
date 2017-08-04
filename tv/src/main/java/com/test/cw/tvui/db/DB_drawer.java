@@ -57,7 +57,7 @@ public class DB_drawer
 
 		// Will call DatabaseHelper.onCreate()first time when WritableDatabase is not created yet
 		mSqlDb = mDbHelper.getWritableDatabase();
-        mCursor_folder = this.getFolderCursor();
+//        mCursor_folder = this.getFolderCursor(); //no drawer table is created, don't need this
 		return DB_drawer.this;
 	}
 
@@ -85,13 +85,14 @@ public class DB_drawer
 	    }
 	}
 
-    // insert com.test.cw.tvui.folder table
+    // insert folder table
     public void insertFolderTable(DB_drawer dbDrawer, int id, boolean is_SQLiteOpenHelper_onCreate)
     {
+        System.out.println("DB_drawer / _insertFolderTable / id = " + id);
     	if(!is_SQLiteOpenHelper_onCreate)
             dbDrawer.open();
 
-    	// table for com.test.cw.tvui.folder
+    	// table for folder
 		String tableCreated = DB_FOLDER_TABLE_PREFIX.concat(String.valueOf(id));
         String DB_CREATE = "CREATE TABLE IF NOT EXISTS " + tableCreated + "(" +
 				DB_folder.KEY_PAGE_ID + " INTEGER PRIMARY KEY," +
@@ -100,6 +101,8 @@ public class DB_drawer
 				DB_folder.KEY_PAGE_STYLE + " INTEGER," +
 				DB_folder.KEY_PAGE_CREATED + " INTEGER);";
         mSqlDb.execSQL(DB_CREATE);
+
+        System.out.println("DB_drawer / _insertFolderTable / tableCreated = " + tableCreated);
 
         if(Define.HAS_PREFERENCE)
         {
