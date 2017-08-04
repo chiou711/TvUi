@@ -151,7 +151,7 @@ public class Import_fileViewAct extends Activity
     static ParseXmlToDB parser;
     private void insertViewContentToDB(boolean enableInsertDB)
     {
-		System.out.println("Import_fileViewAct / _insertViewContentToDB / MainFragment.isNew = " + MainFragment.isNew);
+		System.out.println("Import_fileViewAct / _insertViewContentToDB / MainFragment.isNewDB = " + MainFragment.isNewDB);
 		extras = getIntent().getExtras();
     	mFile = new File(extras.getString("FILE_PATH"));
     	

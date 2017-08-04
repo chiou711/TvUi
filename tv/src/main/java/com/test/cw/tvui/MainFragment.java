@@ -66,7 +66,7 @@ public class MainFragment extends BrowseFragment {
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
     public static AlertDialog alertDlg;
-    public static boolean isNew;
+    public static boolean isNewDB;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -84,8 +84,8 @@ public class MainFragment extends BrowseFragment {
         Import_fileViewAct.isAddingNewFolder = false;
 
         // dialog for Continue loading
-        isNew = !Util.getPref_has_default_import(MainActivity.mAct,0);
-        if(isNew) {
+        isNewDB = !Util.getPref_has_default_import(MainActivity.mAct,0);
+        if(isNewDB) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle("Will load data items")
                    .setMessage("It takes a period to load completely.")
@@ -127,7 +127,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     // load items by DB
-    private void loadItemsByDB(int folderTableId)
+    void loadItemsByDB(int folderTableId)
     {
         System.out.println("MainFragment / _loadItemsByDB / folderTableId = " + folderTableId);
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
@@ -146,7 +146,6 @@ public class MainFragment extends BrowseFragment {
         gridRowAdapter.add("2nd");
         gridRowAdapter.add("3rd");
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
-
 
         // Only one folder, default folder table id = 1
         DB_folder db_folder = new DB_folder(getActivity(),folderTableId);
@@ -225,7 +224,7 @@ public class MainFragment extends BrowseFragment {
             public void onClick(View view) {
 //                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getActivity(), Import_fileListAct.class);
-                startActivity(intent);
+                startActivityForResult(intent,MovieList.REQUEST_IMPORT);
             }
         });
 
@@ -317,15 +316,11 @@ public class MainFragment extends BrowseFragment {
 //                if (((String) item).contains(getString(R.string.error_fragment)))
                 if (((String) item).contains("1st"))
                 {
-//                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
-//                    startActivity(intent);
                     loadItemsByDB(1);
-//                    setupEventListeners();
                 }
                 else if (((String) item).contains("2nd"))
                 {
                     loadItemsByDB(2);
-//                    setupEventListeners();
                 }
                 else
                 {
@@ -383,6 +378,17 @@ public class MainFragment extends BrowseFragment {
 
         @Override
         public void onUnbindViewHolder(ViewHolder viewHolder) {
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        System.out.println("MainFragment / _onActivityResult / requestCode = " + requestCode);
+
+        if(requestCode == MovieList.REQUEST_IMPORT)
+        {
+            loadItemsByDB(DB_folder.getFocusFolder_tableId());
         }
     }
 }

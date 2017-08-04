@@ -9,6 +9,7 @@ import java.util.List;
 //TODO
 public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
+    static int REQUEST_IMPORT = 998;
     static List<Movie> list;
     static List<Movie> setupMoviesByDB(int pagePosition)
     {

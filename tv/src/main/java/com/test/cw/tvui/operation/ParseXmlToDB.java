@@ -84,10 +84,10 @@ public class ParseXmlToDB {
 
         // last page table Id
         int lastPageTableId = 0;
-        if(MainFragment.isNew && !Import_fileViewAct.isAddingNewFolder ) {
+        if(MainFragment.isNewDB && !Import_fileViewAct.isAddingNewFolder ) {
             lastPageTableId = 0;
         }
-        else if(!MainFragment.isNew ||Import_fileViewAct.isAddingNewFolder )
+        else if(!MainFragment.isNewDB ||Import_fileViewAct.isAddingNewFolder )
         {
             mDb_folder.open();
             lastPageTableId = mDb_folder.getPagesCount(false);
@@ -196,15 +196,15 @@ public class ParseXmlToDB {
 
             // parse finished, set flags
             isParsing = false;
-            if(MainFragment.isNew &&
+            if(MainFragment.isNewDB &&
                DB_folder.getFocusFolder_tableId() == Define.ORIGIN_FOLDERS_COUNT)
             {
-                MainFragment.isNew = false;
+                MainFragment.isNewDB = false;
                 // set preference
                 Util.setPref_has_default_import(MainActivity.mAct,true,0);
             }
             else
-                MainFragment.isNew = true;
+                MainFragment.isNewDB = true;
 
             if(Import_fileViewAct.isAddingNewFolder)
                 Import_fileViewAct.isAddingNewFolder = false;

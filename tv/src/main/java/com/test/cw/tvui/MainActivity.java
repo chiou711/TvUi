@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
             }
             else
             {
-                final boolean ENABLE_DB_CHECK = true;//true;//false
+                final boolean ENABLE_DB_CHECK = false;//true;//false
                 if(ENABLE_DB_CHECK)
                     Folder.listAllPageTables(mAct);
             }
@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
             intent.putExtra("force_fullscreen",true);
             intent.putExtra("finish_on_ended",true);
-            startActivityForResult(intent,999);
+            startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
         }
     }
 
@@ -168,7 +168,7 @@ public class MainActivity extends Activity {
             {
                 for(int i=1;i<=Define.ORIGIN_FOLDERS_COUNT;i++)
                 {
-                    MainFragment.isNew = true;
+                    MainFragment.isNewDB = true;
                     DB_folder.setFocusFolder_tableId(i);
 
                     // import default tables
@@ -176,7 +176,7 @@ public class MainActivity extends Activity {
                 }
             }
             else
-                MainFragment.isNew = false;
+                MainFragment.isNewDB = false;
         }
 
     }
