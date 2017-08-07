@@ -130,7 +130,7 @@ public class MainActivity extends Activity {
             System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
 
             // new page
-            db_folder = new DB_folder(this,1);
+            db_folder = new DB_folder(this,DB_folder.getFocusFolder_tableId()); //1
             db_folder.open();
             int pagesLen = db_folder.getPagesCount(false);
             db_folder.close();

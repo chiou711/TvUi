@@ -134,7 +134,7 @@ public class MainFragment extends BrowseFragment {
 
         CardPresenter cardPresenter = new CardPresenter();
 
-        //TODO import DB data
+        //import DB data
         // prepare items
         int countRows = 0;
 
@@ -215,7 +215,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void setupEventListeners() {
-        System.out.println("_setupEventListeners");
+        System.out.println("MainFragment / _setupEventListeners");
 
         // Search Click
         setOnSearchClickedListener(new View.OnClickListener()
@@ -280,11 +280,18 @@ public class MainFragment extends BrowseFragment {
                 //Launch YouTube by item view click
                 currPageId = (int)row.getId();
                 currLinkId = (int)movie.getId();
+
+                DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
+                db_folder.open();
+                int len = db_folder.getPagesCount(false);
+                db_folder.close();
+
                 // get real link Id in row
+//                for(int i = 0; i< currPageId; i++) {
+                for(int i = 0; i< len; i++) {
 
-                for(int i = 0; i< currPageId; i++) {
-
-                    DB_folder db_folder = new DB_folder(MainActivity.mAct,1);
+//                    DB_folder db_folder = new DB_folder(MainActivity.mAct,1);
+//                    DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
                     int page_table = db_folder.getPageTableId(i,true);
 
                     DB_page db_page = new DB_page(MainActivity.mAct,page_table);
@@ -316,11 +323,22 @@ public class MainFragment extends BrowseFragment {
 //                if (((String) item).contains(getString(R.string.error_fragment)))
                 if (((String) item).contains("1st"))
                 {
+                    setupUIElements();
                     loadItemsByDB(1);
+                    setupEventListeners();
                 }
                 else if (((String) item).contains("2nd"))
                 {
+                    setupUIElements();
                     loadItemsByDB(2);
+                    setupEventListeners();//TODO　bug: why listener no action?
+                    //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
+                }
+                else if (((String) item).contains("3rd"))
+                {
+                    setupUIElements();
+                    loadItemsByDB(3);
+                    setupEventListeners();
                 }
                 else
                 {
@@ -334,10 +352,10 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-//            if (item instanceof Movie) {
+            if (item instanceof Movie) {
 //                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
 //                startBackgroundTimer();
-//            }
+            }
 
         }
     }
@@ -388,7 +406,9 @@ public class MainFragment extends BrowseFragment {
 
         if(requestCode == MovieList.REQUEST_IMPORT)
         {
+            setupUIElements();
             loadItemsByDB(DB_folder.getFocusFolder_tableId());
+            setupEventListeners();
         }
     }
 }
