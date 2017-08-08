@@ -331,7 +331,7 @@ public class MainFragment extends BrowseFragment {
                 {
                     setupUIElements();
                     loadItemsByDB(2);
-                    setupEventListeners();//TODO　bug: why listener no action?
+                    setupEventListeners();//bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
                     //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
                 }
                 else if (((String) item).contains("3rd"))

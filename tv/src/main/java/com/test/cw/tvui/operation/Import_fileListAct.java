@@ -19,7 +19,10 @@ import com.test.cw.tvui.util.ColorSet;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class Import_fileListAct extends ListActivity
 {
@@ -119,14 +122,27 @@ public class Import_fileListAct extends ListActivity
             fileNames = new ArrayList<String>();
             filePathArray.add("");
             fileNames.add("ROOT");
-            
+
+            // simple alphabetic sort
+//            Arrays.sort(files);
+
+            // sort by modification
+//            Arrays.sort(files, new Comparator<File>() {
+//                public int compare(File f1, File f2) {
+////                    return Long.compare(f1.lastModified(), f2.lastModified());//old first
+//                    return Long.compare(f2.lastModified(), f1.lastModified());//new first
+//                }
+//            });
+
+            // sort by alphabetic
+            Arrays.sort(files, new FileNameComparator());
+
 	        for(File file : files)
 	        {
                 System.out.println("Import_fileListAct / _getFiles / file.getPath() = " + file.getPath());
                 System.out.println("Import_fileListAct / _getFiles / file.getName() = " + file.getName());
                 filePathArray.add(file.getPath());
                 fileNames.add(file.getName());
-
             }
             FilenameAdapter fileList = new FilenameAdapter(this,
                                                            R.layout.sd_file_list_row,
@@ -135,6 +151,25 @@ public class Import_fileListAct extends ListActivity
 	        setListAdapter(fileList);
         }
 
+    }
+
+    // Directory group and file group, both directory and file are sorted alphabetically
+    // cf. https://stackoverflow.com/questions/24404055/sort-filelist-folders-then-files-both-alphabetically-in-android
+    private class FileNameComparator implements Comparator<File>{
+        public int compare(File lhsS, File rhsS){
+            File lhs = new File(lhsS.toString().toLowerCase(Locale.US));
+            File rhs= new File(rhsS.toString().toLowerCase(Locale.US));
+            if (lhs.isDirectory() && !rhs.isDirectory()){
+                // Directory before File
+                return -1;
+            } else if (!lhs.isDirectory() && rhs.isDirectory()){
+                // File after directory
+                return 1;
+            } else {
+                // Otherwise in Alphabetic order...
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        }
     }
 
     // File name array for setting focus and file name
