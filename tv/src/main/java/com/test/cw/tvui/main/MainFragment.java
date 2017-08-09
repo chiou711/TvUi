@@ -128,6 +128,10 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
+    String itemStr1 = "--- 1st ---";
+    String itemStr2 = "2nd";
+    String itemStr3 = "3rd";
+
     // load items by DB
     void loadItemsByDB(int folderTableId)
     {
@@ -142,11 +146,11 @@ public class MainFragment extends BrowseFragment {
 
         // other
         HeaderItem gridHeader = new HeaderItem(countRows, "Folders");
-        GridItemPresenter mGridPresenter = new GridItemPresenter();
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-        gridRowAdapter.add("1st");
-        gridRowAdapter.add("2nd");
-        gridRowAdapter.add("3rd");
+        GridItemPresenter gridPresenter = new GridItemPresenter();
+        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
+        gridRowAdapter.add(itemStr1);
+        gridRowAdapter.add(itemStr2);
+        gridRowAdapter.add(itemStr3);
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         // Only one folder, default folder table id = 1
@@ -325,19 +329,30 @@ public class MainFragment extends BrowseFragment {
 //                if (((String) item).contains(getString(R.string.error_fragment)))
                 if (((String) item).contains("1st"))
                 {
+                    itemStr1 = "--- 1st ---";
+                    itemStr2 = "2nd";
+                    itemStr3 = "3rd";
                     setupUIElements();
                     loadItemsByDB(1);
                     setupEventListeners();
                 }
                 else if (((String) item).contains("2nd"))
                 {
+                    itemStr1 = "1st";
+                    itemStr2 = "--- 2nd ---";
+                    itemStr3 = "3rd";
                     setupUIElements();
                     loadItemsByDB(2);
                     setupEventListeners();//bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
                     //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
+//                    ((TextView)itemViewHolder.view).setText("<2nd>");//??? no response?
+
                 }
                 else if (((String) item).contains("3rd"))
                 {
+                    itemStr1 = "1st";
+                    itemStr2 = "2nd";
+                    itemStr3 = "--- 3rd ---";
                     setupUIElements();
                     loadItemsByDB(3);
                     setupEventListeners();
@@ -357,6 +372,22 @@ public class MainFragment extends BrowseFragment {
             if (item instanceof Movie) {
 //                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
 //                startBackgroundTimer();
+            }
+
+            if (item instanceof String)
+            {
+//                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
+//                if (((String) item).contains(getString(R.string.error_fragment)))
+                if (((String) item).contains("1st"))
+                {
+                }
+                else if (((String) item).contains("2nd"))
+                {
+//                    ((TextView)itemViewHolder.view).setText("<2nd>");
+                }
+                else if (((String) item).contains("3rd"))
+                {
+                }
             }
 
         }
@@ -394,11 +425,20 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, Object item) {
             ((TextView) viewHolder.view).setText((String) item);
+
+            if(((String)item).equalsIgnoreCase("--- 1st ---") ||
+               ((String)item).equalsIgnoreCase("--- 2nd ---") ||
+               ((String)item).equalsIgnoreCase("--- 3rd ---")     )
+            {
+                ((TextView) viewHolder.view).setTextColor(getResources().getColor(R.color.white));
+                viewHolder.view.setBackgroundColor(getResources().getColor(R.color.search_opaque));
+            }
         }
 
         @Override
         public void onUnbindViewHolder(ViewHolder viewHolder) {
         }
+
     }
 
     @Override
