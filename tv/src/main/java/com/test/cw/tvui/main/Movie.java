@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.main;
 
 import android.util.Log;
 

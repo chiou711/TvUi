@@ -27,10 +27,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.test.cw.tvui.MainFragment;
+import com.test.cw.tvui.main.MainFragment;
 import com.test.cw.tvui.R;
-import com.test.cw.tvui.ColorSet;
-import com.test.cw.tvui.Util;
+import com.test.cw.tvui.util.ColorSet;
+import com.test.cw.tvui.util.Util;
 import com.test.cw.tvui.db.DB_folder;
 
 import java.io.File;
@@ -101,7 +101,7 @@ public class Import_fileViewAct extends Activity
         backButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                finish();
+                finish();//TODO go back to Import_fileListAct
             }
         });
 

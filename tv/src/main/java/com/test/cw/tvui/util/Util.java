@@ -1,4 +1,4 @@
-package com.test.cw.tvui;
+package com.test.cw.tvui.util;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,7 +8,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.support.v4.app.FragmentActivity;
+
+import com.test.cw.tvui.R;
 
 import java.io.File;
 import java.io.FileOutputStream;

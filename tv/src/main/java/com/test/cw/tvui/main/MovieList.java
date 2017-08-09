@@ -1,7 +1,8 @@
-package com.test.cw.tvui;
+package com.test.cw.tvui.main;
 
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
+import com.test.cw.tvui.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
     static int REQUEST_IMPORT = 998;
-    static List<Movie> list;
+    public static List<Movie> list;
     static List<Movie> setupMoviesByDB(int pagePosition)
     {
         int pageTableId;

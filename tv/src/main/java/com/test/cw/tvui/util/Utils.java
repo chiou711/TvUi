@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.util;
 
 import android.content.Context;
 import android.graphics.Point;

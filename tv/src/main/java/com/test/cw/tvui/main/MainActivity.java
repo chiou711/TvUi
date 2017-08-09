@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.main;
 
 import android.Manifest;
 import android.app.Activity;
@@ -25,12 +25,14 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.test.cw.tvui.R;
 import com.test.cw.tvui.db.DB_drawer;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.folder.Folder;
 import com.test.cw.tvui.operation.Import_fileViewAct;
 import com.test.cw.tvui.preference.Define;
+import com.test.cw.tvui.util.Util;
 
 /*
  * MainActivity class that loads MainFragment

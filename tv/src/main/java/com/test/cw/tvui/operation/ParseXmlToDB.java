@@ -2,9 +2,9 @@ package com.test.cw.tvui.operation;
 
 import android.content.Context;
 
-import com.test.cw.tvui.MainActivity;
-import com.test.cw.tvui.MainFragment;
-import com.test.cw.tvui.Util;
+import com.test.cw.tvui.main.MainActivity;
+import com.test.cw.tvui.main.MainFragment;
+import com.test.cw.tvui.util.Util;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.preference.Define;

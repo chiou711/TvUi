@@ -3,7 +3,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.test.cw.tvui.MainActivity;
+import com.test.cw.tvui.main.MainActivity;
 import com.test.cw.tvui.preference.Define;
 
 // Data Base Helper

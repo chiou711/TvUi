@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.main;
 
 import java.net.URI;
 import java.util.List;
@@ -46,10 +46,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.test.cw.tvui.R;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.operation.Import_fileListAct;
 import com.test.cw.tvui.operation.Import_fileViewAct;
+import com.test.cw.tvui.util.Util;
 
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";

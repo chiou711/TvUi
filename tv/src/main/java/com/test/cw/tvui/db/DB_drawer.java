@@ -6,10 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
-import android.widget.Toast;
 
-import com.test.cw.tvui.R;
-import com.test.cw.tvui.MainActivity;
 import com.test.cw.tvui.preference.Define;
 
 import java.util.Date;

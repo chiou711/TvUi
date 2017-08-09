@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.main;
 
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.test.cw.tvui.R;
 
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand.

@@ -3,6 +3,7 @@ package com.test.cw.tvui.operation;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -14,8 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.test.cw.tvui.R;
-import com.test.cw.tvui.Util;
 import com.test.cw.tvui.util.ColorSet;
+import com.test.cw.tvui.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -186,10 +187,16 @@ public class Import_fileListAct extends ListActivity
                 convertView = getLayoutInflater().inflate(R.layout.sd_file_list_row, parent, false);
             }
 
+            String appName = getString(R.string.app_name);
             convertView.setFocusable(true);
             convertView.setClickable(true);
             TextView tv = (TextView)convertView.findViewById(R.id.text1);
             tv.setText(fileNames.get(position));
+            if(fileNames.get(position).contains("sdcard")   ||
+               fileNames.get(position).contains(appName)    ||
+               fileNames.get(position).contains("LiteNote") ||
+               fileNames.get(position).contains("Download")         )
+                tv.setTypeface(null, Typeface.BOLD);
 
             final int item = position;
             convertView.setOnClickListener(new View.OnClickListener() {
