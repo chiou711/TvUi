@@ -1,11 +1,11 @@
 package com.test.cw.tvui.operation;
 
-import android.app.ListActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.test.cw.tvui.R;
+import com.test.cw.tvui.util.OnBackPressedListener;
 import com.test.cw.tvui.util.ColorSet;
 import com.test.cw.tvui.util.Util;
 
@@ -25,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-public class Import_fileListAct extends ListActivity
+public class Import_fileListAct extends FragmentActivity
 {
     private List<String> filePathArray = null;
     List<String> fileNames = null;
@@ -36,11 +37,12 @@ public class Import_fileListAct extends ListActivity
     {
         setContentView(R.layout.sd_file_list);
         System.out.println("Import_fileListAct / _onCreate");
+
+        listView = (ListView)findViewById(R.id.file_list);
+        listView.setItemsCanFocus(true);
+
         View view = findViewById(R.id.view_back_btn_bg);
         view.setBackgroundColor(ColorSet.getBarColor(this));
-
-        listView = (ListView)findViewById(android.R.id.list);
-        listView.setItemsCanFocus(true);
 
         // back button
         Button backButton = (Button) findViewById(R.id.view_back);
@@ -65,9 +67,39 @@ public class Import_fileListAct extends ListActivity
         getFiles(new File(dirString).listFiles());
     }
 
-    // on list item click
+
+    public void setOnBackPressedListener(OnBackPressedListener listener) {
+        this.onBackPressedListener = listener;
+    }
+
+    OnBackPressedListener onBackPressedListener;
+    /**
+     *  on Back button pressed
+     *
+     */
     @Override
-    public void onListItemClick(ListView l, View v, int position, long rowId)
+    public void onBackPressed()
+    {
+        System.out.println("Import_fileListAct / _onBackPressed");
+
+        if (onBackPressedListener != null)
+        {
+            onBackPressedListener.doBack();
+
+            View view1 = findViewById(R.id.view_back_btn_bg);
+            view1.setVisibility(View.VISIBLE);
+            View view2 = findViewById(R.id.file_list_title);
+            view2.setVisibility(View.VISIBLE);
+
+            onBackPressedListener = null;
+        }
+        else
+            super.onBackPressed();
+    }
+
+    // on list item click
+//    @Override
+    public void onListItemClick(int position)
     {
         System.out.println("Import_fileListAct / _onListViewItemClick / position = " + position);
         int selectedRow = position;
@@ -93,9 +125,26 @@ public class Import_fileListAct extends ListActivity
                    (file.getName().contains("XML") ||
                     file.getName().contains("xml")     ))
             	{
-		           	Intent i = new Intent(this, Import_fileViewAct.class);
-		           	i.putExtra("FILE_PATH", filePath);
-		           	startActivity(i);
+//		           	Intent i = new Intent(this, Import_fileView.class);
+//		           	i.putExtra("FILE_PATH", filePath);
+//		           	startActivity(i);
+
+                    ///
+                    View view1 = findViewById(R.id.view_back_btn_bg);
+                    view1.setVisibility(View.GONE);
+                    View view2 = findViewById(R.id.file_list_title);
+                    view2.setVisibility(View.GONE);
+
+                    Import_fileView mConfigFragment = new Import_fileView();
+                    final Bundle args = new Bundle();
+                    args.putString("KEY_FILE_PATH", filePath);
+                    mConfigFragment.setArguments(args);
+                    FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    mFragmentTransaction.setCustomAnimations(R.anim.fragment_slide_in_left, R.anim.fragment_slide_out_left, R.anim.fragment_slide_in_right, R.anim.fragment_slide_out_right);
+                    mFragmentTransaction.replace(R.id.file_list_linear, mConfigFragment).addToBackStack("import").commit();
+
+                    ///
+
             	}
             	else
             	{
@@ -149,7 +198,7 @@ public class Import_fileListAct extends ListActivity
                                                            R.layout.sd_file_list_row,
                                                            fileNames);
 
-	        setListAdapter(fileList);
+            listView.setAdapter(fileList);
         }
 
     }
@@ -202,7 +251,7 @@ public class Import_fileListAct extends ListActivity
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onListItemClick(listView,v,item,item);
+                    onListItemClick(item);
                 }
             });
             return convertView;

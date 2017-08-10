@@ -30,7 +30,7 @@ import com.test.cw.tvui.db.DB_drawer;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.folder.Folder;
-import com.test.cw.tvui.operation.Import_fileViewAct;
+import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
 
@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
                     DB_folder.setFocusFolder_tableId(i);
 
                     // import default tables
-                    Import_fileViewAct.createDefaultTables(mAct, i);
+                    Import_fileView.createDefaultTables(mAct, i);
                 }
             }
             else

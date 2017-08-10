@@ -50,7 +50,7 @@ import com.test.cw.tvui.R;
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.operation.Import_fileListAct;
-import com.test.cw.tvui.operation.Import_fileViewAct;
+import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.util.Util;
 
 public class MainFragment extends BrowseFragment {
@@ -83,7 +83,7 @@ public class MainFragment extends BrowseFragment {
         setupUIElements();
 
         // set true at Import runtime
-        Import_fileViewAct.isAddingNewFolder = false;
+        Import_fileView.isAddingNewFolder = false;
 
         // dialog for Continue loading
         isNewDB = !Util.getPref_has_default_import(MainActivity.mAct,0);

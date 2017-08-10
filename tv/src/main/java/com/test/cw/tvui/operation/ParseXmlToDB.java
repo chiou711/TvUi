@@ -84,10 +84,10 @@ public class ParseXmlToDB {
 
         // last page table Id
         int lastPageTableId = 0;
-        if(MainFragment.isNewDB && !Import_fileViewAct.isAddingNewFolder ) {
+        if(MainFragment.isNewDB && !Import_fileView.isAddingNewFolder ) {
             lastPageTableId = 0;
         }
-        else if(!MainFragment.isNewDB ||Import_fileViewAct.isAddingNewFolder )
+        else if(!MainFragment.isNewDB || Import_fileView.isAddingNewFolder )
         {
             mDb_folder.open();
             lastPageTableId = mDb_folder.getPagesCount(false);
@@ -206,8 +206,8 @@ public class ParseXmlToDB {
             else
                 MainFragment.isNewDB = true;
 
-            if(Import_fileViewAct.isAddingNewFolder)
-                Import_fileViewAct.isAddingNewFolder = false;
+            if(Import_fileView.isAddingNewFolder)
+                Import_fileView.isAddingNewFolder = false;
 
             if(MainFragment.alertDlg != null)
                 MainFragment.alertDlg.dismiss();

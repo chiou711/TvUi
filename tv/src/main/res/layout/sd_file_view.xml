@@ -43,7 +43,8 @@
 	<ScrollView
         android:id="@+id/view_body_scrollview"
     	android:layout_width="match_parent"
-    	android:layout_height="0dp" android:layout_weight="1"
+    	android:layout_height="0dp"
+		android:layout_weight="1"
     	android:orientation="vertical"
         android:nextFocusRight="@+id/view_back"
         android:nextFocusDown="@+id/view_back">
@@ -64,7 +65,8 @@
 	    android:orientation="horizontal" >
 		<Button
 			android:id="@+id/view_back"
-			android:layout_width="0dp" android:layout_weight="1"
+			android:layout_width="0dp"
+            android:layout_weight="1"
 			android:layout_height="50dp"
 			android:text="Back"
 			android:background="@drawable/button_nav"
@@ -74,7 +76,8 @@
             android:nextFocusDown="@+id/view_delete"/>
 		<Button
 			android:id="@+id/view_delete"
-			android:layout_width="0dp" android:layout_weight="1"
+			android:layout_width="0dp"
+            android:layout_weight="1"
 			android:layout_height="50dp"
 			android:text="Delete"
 			android:background="@drawable/button_nav"
@@ -84,7 +87,8 @@
             android:nextFocusDown="@+id/view_confirm"/>
 	    <Button
 	        android:id="@+id/view_confirm"
-	        android:layout_width="0dp" android:layout_weight="1"
+	        android:layout_width="0dp"
+            android:layout_weight="1"
 	        android:layout_height="50dp"
 	        android:text="OK"
 			android:background="@drawable/button_nav"
