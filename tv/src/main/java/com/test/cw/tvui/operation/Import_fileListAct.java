@@ -72,7 +72,7 @@ public class Import_fileListAct extends FragmentActivity
         this.onBackPressedListener = listener;
     }
 
-    OnBackPressedListener onBackPressedListener;
+    static OnBackPressedListener onBackPressedListener;
     /**
      *  on Back button pressed
      *

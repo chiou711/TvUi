@@ -105,7 +105,7 @@ public class Import_fileView extends Fragment
 		backButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
-                getActivity().finish();//TODO go back to Import_fileListAct
+				Import_fileListAct.onBackPressedListener.doBack();
 			}
 		});
 
@@ -115,7 +115,7 @@ public class Import_fileView extends Fragment
 			public void onClick(View view)
 			{
 				AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
-				builder1.setTitle("Confirmation")
+				builder1.setTitle("Confirmation")//TODO local
 						.setMessage("Do you want to delete this file?" +
 								" (" + mFile.getName() +")" )
 						.setNegativeButton("No", new DialogInterface.OnClickListener()
@@ -129,7 +129,7 @@ public class Import_fileView extends Fragment
 							public void onClick(DialogInterface dialog1, int which1)
 							{
 								mFile.delete();
-                                getActivity().finish();
+								Import_fileListAct.onBackPressedListener.doBack();
 							}
 						})
 						.show();
@@ -193,22 +193,27 @@ public class Import_fileView extends Fragment
     {
 		String fileName = "default" + String.valueOf(folderTableId)+".xml";
 		System.out.println("Import_fileView / _createDefaultTables / fileName = " + fileName);
-        FileInputStream fileInputStream = null;
         File assetsFile = Util.createAssetsFile(act,fileName);
+
+        if(assetsFile == null)
+            return;
+
+        FileInputStream fileInputStream = null;
         try
         {
             fileInputStream = new FileInputStream(assetsFile);
+
+            // import data by ParseXmlToDB class
+            parser = new ParseXmlToDB(act,fileInputStream);
+            parser.enableSaveDB(true);
+            parser.startParseThread(folderTableId);
+            while(parser.isParsing);
         }
         catch (FileNotFoundException e)
         {
             e.printStackTrace();
         }
 
-        // import data by ParseXmlToDB class
-        parser = new ParseXmlToDB(act,fileInputStream);
-        parser.enableSaveDB(true);
-        parser.startParseThread(folderTableId);
-        while(parser.isParsing);
 	}
 
     @Override
@@ -266,8 +271,8 @@ public class Import_fileView extends Fragment
 			
 			if(enableSaveDB)
 			{
-                getActivity().finish();
-				Toast.makeText(getActivity(),"Import finished",Toast.LENGTH_SHORT).show();
+				Import_fileListAct.onBackPressedListener.doBack();
+				Toast.makeText(getActivity(),"Import finished",Toast.LENGTH_SHORT).show();//TODO local
 			}
 			else
 			{

@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LiteNote>
+    <page>
+        <page_name>2016 騎行中國</page_name>
 
+        <note>
+            <title>[n]</title>
+            <body></body>
+            <picture></picture>
+            <audio></audio>
+            <link>https://www.youtube.com/watch?v=AWxsr9QBBvA</link>
+        </note>
+
+        <note>
+            <title>[n]</title>
+            <body></body>
+            <picture></picture>
+            <audio></audio>
+            <link>https://www.youtube.com/watch?v=ykkG2pHXrQg</link>
+        </note>
+
+        <note>
+            <title>[n]</title>
+            <body></body>
+            <picture></picture>
+            <audio></audio>
+            <link>https://www.youtube.com/watch?v=IJU7ovKWStc</link>
+        </note>
+
+        <note>
+            <title>[n]</title>
+            <body></body>
+            <picture></picture>
+            <audio></audio>
+            <link>https://www.youtube.com/watch?v=CiH7r_qgpTY</link>
+        </note>
+
+
+        <note>
+            <title>[n]CCTV中文国际</title>
+            <body></body>
+            <picture></picture>
+            <audio></audio>
+            <link>https://youtu.be/Y8Wy9LXCapw</link>
+        </note>
+
+    </page>
 
 </LiteNote>

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 import com.test.cw.tvui.R;
+import com.test.cw.tvui.db.DB_drawer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -175,11 +176,18 @@ public class Util {
     {
         File file = null;
         AssetManager am = act.getAssets();
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = am.open(fileName);
         } catch (IOException e1) {
+
+            // No default XML file, create a new folder instead
+            int startNum = Util.getNumberInString(fileName);
+            DB_drawer db_drawer = new DB_drawer(act);
+            db_drawer.insertFolderTable(db_drawer, startNum, false);
+
             e1.printStackTrace();
+            return null;
         }
 
         // main directory
@@ -261,5 +269,15 @@ public class Util {
         SharedPreferences pref = context.getSharedPreferences("last_time_view", 0);
         String keyName = "KEY_HAS_DEFAULT_IMPORT"+position;
         return pref.getBoolean(keyName, false);
+    }
+
+    // get number in a string
+    public static int getNumberInString(String oriStr)
+    {
+        int number;
+        String pattern = "\\D";
+        String strItem = oriStr.replaceAll(pattern,"");
+        number = Integer.valueOf(strItem);
+        return number;
     }
 }

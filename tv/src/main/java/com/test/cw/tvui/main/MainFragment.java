@@ -51,6 +51,7 @@ import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.operation.Import_fileListAct;
 import com.test.cw.tvui.operation.Import_fileView;
+import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
 
 public class MainFragment extends BrowseFragment {
@@ -128,10 +129,6 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    String itemStr1 = "--- 1st ---";
-    String itemStr2 = "2nd";
-    String itemStr3 = "3rd";
-
     // load items by DB
     void loadItemsByDB(int folderTableId)
     {
@@ -148,9 +145,17 @@ public class MainFragment extends BrowseFragment {
         HeaderItem gridHeader = new HeaderItem(countRows, "Folders");
         GridItemPresenter gridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
-        gridRowAdapter.add(itemStr1);
-        gridRowAdapter.add(itemStr2);
-        gridRowAdapter.add(itemStr3);
+
+        for(int i=1;i<= Define.ORIGIN_FOLDERS_COUNT;i++) {
+            if(i==1)
+                gridRowAdapter.add("1st");
+            else if(i==2)
+                gridRowAdapter.add("2nd");
+            else if(i==3)
+                gridRowAdapter.add("3rd");
+            else
+                gridRowAdapter.add(String.valueOf(i).concat("th"));
+        }
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         // Only one folder, default folder table id = 1
@@ -264,6 +269,7 @@ public class MainFragment extends BrowseFragment {
 //        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
 //    }
 
+    static int currFolderNum = 1;
     static int currPageId;
     static int currLinkId;
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -327,40 +333,13 @@ public class MainFragment extends BrowseFragment {
             {
 //                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
 //                if (((String) item).contains(getString(R.string.error_fragment)))
-                if (((String) item).contains("1st"))
-                {
-                    itemStr1 = "--- 1st ---";
-                    itemStr2 = "2nd";
-                    itemStr3 = "3rd";
-                    setupUIElements();
-                    loadItemsByDB(1);
-                    setupEventListeners();
-                }
-                else if (((String) item).contains("2nd"))
-                {
-                    itemStr1 = "1st";
-                    itemStr2 = "--- 2nd ---";
-                    itemStr3 = "3rd";
-                    setupUIElements();
-                    loadItemsByDB(2);
-                    setupEventListeners();//bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
-                    //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
-//                    ((TextView)itemViewHolder.view).setText("<2nd>");//??? no response?
 
-                }
-                else if (((String) item).contains("3rd"))
-                {
-                    itemStr1 = "1st";
-                    itemStr2 = "2nd";
-                    itemStr3 = "--- 3rd ---";
-                    setupUIElements();
-                    loadItemsByDB(3);
-                    setupEventListeners();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT).show();
-                }
+                currFolderNum = Util.getNumberInString(((String) item));
+                setupUIElements();
+                loadItemsByDB(currFolderNum);
+                setupEventListeners();
+                //bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
+                //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
             }
         }
     }
@@ -425,14 +404,13 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, Object item) {
             ((TextView) viewHolder.view).setText((String) item);
+            ((TextView) viewHolder.view).setTextColor(getResources().getColor(R.color.white));
 
-            if(((String)item).equalsIgnoreCase("--- 1st ---") ||
-               ((String)item).equalsIgnoreCase("--- 2nd ---") ||
-               ((String)item).equalsIgnoreCase("--- 3rd ---")     )
-            {
-                ((TextView) viewHolder.view).setTextColor(getResources().getColor(R.color.white));
+            int folderNum = Util.getNumberInString(((String) item));
+            if(folderNum == currFolderNum)
                 viewHolder.view.setBackgroundColor(getResources().getColor(R.color.search_opaque));
-            }
+            else
+                viewHolder.view.setBackgroundColor(getResources().getColor(R.color.default_background ));
         }
 
         @Override
