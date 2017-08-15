@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
                 count = 2; // waiting time to next
                 builder = new AlertDialog.Builder(this);
 
-                String link = getYouTubeLink(MainFragment.currLinkId);
+                String link = getYouTubeLink();
                 nextLinkTitle =  Util.getYouTubeTitle(link);
 
                 countStr = "If not running, please press No within " + count + " seconds.";
@@ -162,23 +162,42 @@ public class MainActivity extends Activity {
     /**
      *  get YouTube link
      */
-    String getYouTubeLink(int pos)
+    String getYouTubeLink()
     {
-        DB_page db_page = new DB_page(this,DB_page.getFocusPage_tableId());
-        db_page.open();
-        int count = db_page.getNotesCount(false);
-        db_page.close();
+        // page
+        DB_folder db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId());
+        int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
 
-        if(pos >= count)
-        {
-            pos = 0;
+        // link
+        DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
+        db_page.open();
+        int linksLen = db_page.getNotesCount(false);
+        db_page.close();
+        System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
+
+        // meet boundary
+        if (MainFragment.currLinkId >= linksLen) {
+            MainFragment.currPageId++;
+            MainFragment.currLinkId = 0;
         }
 
-        String linkStr="";
-        if(pos < count)
-            linkStr =db_page.getNoteLinkUri(pos,true);
+        // new page
+        db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId()); //1
+        db_folder.open();
+        int pagesLen = db_folder.getPagesCount(false);
+        db_folder.close();
 
-        return linkStr;
+        if (MainFragment.currPageId >= pagesLen)
+            MainFragment.currPageId = 0;
+
+        System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
+        System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
+
+        // link
+        pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
+        db_page = new DB_page(mAct, pageTableId);
+        String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
+        return urlStr;
     }
 
     void cancelYouTubeHandler()
@@ -218,40 +237,7 @@ public class MainActivity extends Activity {
      */
     void launchNextYouTubeIntent()
     {
-        // page
-        DB_folder db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId());
-        int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
-
-        // link
-        DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
-        db_page.open();
-        int linksLen = db_page.getNotesCount(false);
-        db_page.close();
-        System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
-
-        // meet boundary
-        if (MainFragment.currLinkId >= linksLen) {
-            MainFragment.currPageId++;
-            MainFragment.currLinkId = 0;
-        }
-
-        // new page
-        db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId()); //1
-        db_folder.open();
-        int pagesLen = db_folder.getPagesCount(false);
-        db_folder.close();
-
-        if (MainFragment.currPageId >= pagesLen)
-            MainFragment.currPageId = 0;
-
-        System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
-        System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
-
-        // link
-        pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
-        db_page = new DB_page(mAct, pageTableId);
-        String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
-
+        String urlStr = getYouTubeLink();
         // intent
         String id = Util.getYoutubeId(urlStr);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));

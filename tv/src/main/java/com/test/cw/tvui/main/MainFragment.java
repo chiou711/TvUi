@@ -292,40 +292,46 @@ public class MainFragment extends BrowseFragment {
 //                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 //                getActivity().startActivity(intent, bundle);
 
-                //Launch YouTube by item view click
-                String id = Util.getYoutubeId(movie.getVideoUrl());
-                System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                intent.putExtra("force_fullscreen",true);
-                intent.putExtra("finish_on_ended",true);
-
                 if(Define.AUTO_PLAY_NEXT)
                 {
                     currPageId = (int)row.getId();
-                    currLinkId = (int)movie.getId();
 
                     DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
+                    int pageTableId = db_folder.getPageTableId(currPageId,true);
+
+                    DB_page db_page = new DB_page(getActivity(),pageTableId);
+                    db_page.open();
+                    int linksCount = db_page.getNotesCount(false);
+                    db_page.close();
 
                     // get real link Id in row
-                    for(int i = 0; i< currPageId; i++)
+                    for(int i=0;i<linksCount;i++)
                     {
-                        int page_table = db_folder.getPageTableId(i,true);
-                        DB_page db_page = new DB_page(MainActivity.mAct,page_table);
-                        db_page.open();
-                        int length = db_page.getNotesCount(false);
-                        db_page.close();
-                        System.out.println("MainFragment / _onItemClicked / length ("+i+")= "+ length);
-
-                        currLinkId -= length;
+                        if(movie.getVideoUrl().equalsIgnoreCase(db_page.getNoteLinkUri(i,true)))
+                            currLinkId = i;
                     }
                     System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
                     System.out.println("MainFragment / _onItemClicked / currLinkId in row = "+ currLinkId);
+
+                    //Launch YouTube by item view click
+                    String id = Util.getYoutubeId(db_page.getNoteLinkUri(currLinkId,true));
+                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                    intent.putExtra("force_fullscreen",true);
+                    intent.putExtra("finish_on_ended",true);
 
                     // Continue play
                     getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
                 }
                 else
                 {
+                    //Launch YouTube by item view click
+                    String id = Util.getYoutubeId(movie.getVideoUrl());
+                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                    intent.putExtra("force_fullscreen",true);
+                    intent.putExtra("finish_on_ended",true);
+
                     // Play once
                     getActivity().startActivity(intent);
                 }
@@ -340,7 +346,7 @@ public class MainFragment extends BrowseFragment {
                 currFolderNum = Util.getNumberInString(((String) item));
 //                setupUIElements();
                 loadItemsByDB(currFolderNum);
-//                setupEventListeners();
+                setupEventListeners();
                 isKeyEventConsumed = false;
             }
         }
@@ -435,7 +441,7 @@ public class MainFragment extends BrowseFragment {
         {
             setupUIElements();
             loadItemsByDB(DB_folder.getFocusFolder_tableId());
-//            setupEventListeners();
+            setupEventListeners();
         }
     }
 }
