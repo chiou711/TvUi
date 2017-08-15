@@ -16,14 +16,18 @@ package com.test.cw.tvui.main;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.widget.TextView;
 
 import com.test.cw.tvui.R;
 import com.test.cw.tvui.db.DB_drawer;
@@ -103,6 +107,12 @@ public class MainActivity extends Activity {
         }//switch
     }
 
+    AlertDialog.Builder builder;
+    AlertDialog alertDlg;
+    Handler handler;
+    int count;
+    String countStr;
+    String nextLinkTitle;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -115,60 +125,145 @@ public class MainActivity extends Activity {
                 MainFragment.currLinkId++;
                 System.out.println("MainActivity / _onActivityResult / MainFragment.currLinkId = " + MainFragment.currLinkId);
 
-                // page
-                DB_folder db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId());
-                int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
+                count = 2; // waiting time to next
+                builder = new AlertDialog.Builder(this);
 
-                // link
-                DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
-                db_page.open();
-                int linksLen = db_page.getNotesCount(false);
-                db_page.close();
-                System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
+                String link = getYouTubeLink(MainFragment.currLinkId);
+                nextLinkTitle =  Util.getYouTubeTitle(link);
 
-                // meet boundary
-                if (MainFragment.currLinkId >= linksLen) {
-                    MainFragment.currPageId++;
-                    MainFragment.currLinkId = 0;
-                }
+                countStr = "If not running, please press No within " + count + " seconds.";
+                countStr = countStr.replaceFirst("[0-9]",String.valueOf(count));
+                builder.setTitle("Continue running next link?")
+                        .setMessage(nextLinkTitle +"\n\n" + countStr)
+                        .setPositiveButton("No", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog1, int which1)
+                            {
+                                alertDlg.dismiss();
+                                cancelYouTubeHandler();
+                            }
+                        });
+                alertDlg = builder.create();
 
-                // new page
-                db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId()); //1
-                db_folder.open();
-                int pagesLen = db_folder.getPagesCount(false);
-                db_folder.close();
-
-                if (MainFragment.currPageId >= pagesLen)
-                    MainFragment.currPageId = 0;
-
-                System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
-                System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
-
-                // link
-                pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
-                db_page = new DB_page(mAct, pageTableId);
-                String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
-
-                // intent
-                String id = Util.getYoutubeId(urlStr);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                intent.putExtra("force_fullscreen", true);
-                intent.putExtra("finish_on_ended", true);
-                startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
+                // set listener for selection
+                alertDlg.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dlgInterface) {
+                        handler = new Handler();
+                        handler.postDelayed(runCountDown,1000);
+                    }
+                });
+                alertDlg.show();
             }
         }
+    }
+
+    /**
+     *  get YouTube link
+     */
+    String getYouTubeLink(int pos)
+    {
+        DB_page db_page = new DB_page(this,DB_page.getFocusPage_tableId());
+        db_page.open();
+        int count = db_page.getNotesCount(false);
+        db_page.close();
+
+        if(pos >= count)
+        {
+            pos = 0;
+        }
+
+        String linkStr="";
+        if(pos < count)
+            linkStr =db_page.getNoteLinkUri(pos,true);
+
+        return linkStr;
+    }
+
+    void cancelYouTubeHandler()
+    {
+        if(handler != null) {
+            handler.removeCallbacks(runCountDown);
+            handler = null;
+        }
+    }
+
+    /**
+     * runnable for counting down
+     */
+    Runnable runCountDown = new Runnable() {
+        public void run() {
+            // show count down
+            TextView messageView = (TextView) alertDlg.findViewById(android.R.id.message);
+            count--;
+            countStr = "If not running, please press No within " + count + " seconds.";
+            countStr = countStr.replaceFirst("[0-9]",String.valueOf(count));
+            messageView.setText(nextLinkTitle + "\n\n" +countStr);
+
+            if(count>0)
+                handler.postDelayed(runCountDown,1000);
+            else
+            {
+                // launch next intent
+                alertDlg.dismiss();
+                cancelYouTubeHandler();
+                launchNextYouTubeIntent();
+            }
+        }
+    };
+
+    /**
+     *  launch next YouTube intent
+     */
+    void launchNextYouTubeIntent()
+    {
+        // page
+        DB_folder db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId());
+        int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
+
+        // link
+        DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
+        db_page.open();
+        int linksLen = db_page.getNotesCount(false);
+        db_page.close();
+        System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
+
+        // meet boundary
+        if (MainFragment.currLinkId >= linksLen) {
+            MainFragment.currPageId++;
+            MainFragment.currLinkId = 0;
+        }
+
+        // new page
+        db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId()); //1
+        db_folder.open();
+        int pagesLen = db_folder.getPagesCount(false);
+        db_folder.close();
+
+        if (MainFragment.currPageId >= pagesLen)
+            MainFragment.currPageId = 0;
+
+        System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
+        System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
+
+        // link
+        pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
+        db_page = new DB_page(mAct, pageTableId);
+        String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
+
+        // intent
+        String id = Util.getYoutubeId(urlStr);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+        intent.putExtra("force_fullscreen", true);
+        intent.putExtra("finish_on_ended", true);
+        startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
     }
 
     void createDB_data()
     {
         // init DB
         mDb_drawer = new DB_drawer(context);
-
-        // for creating folder tables
-//        if(!Util.getPref_has_default_import(mAct,0)) {
-//            mDb_drawer.open();
-//            mDb_drawer.close();
-//        }
 
         if(Define.HAS_PREFERENCE)
         {

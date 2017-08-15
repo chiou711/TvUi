@@ -42,7 +42,7 @@ public class Define {
     public static int DEFAULT_XML_FILES_COUNT =3;//2;  // Folder1, Folder2, Folder3
 
     // Enable auto play next
-    public static boolean AUTO_PLAY_NEXT = false;//true;//false;
+    public static boolean AUTO_PLAY_NEXT = true;//true;//false;
 
     // default style
     public static int STYLE_DEFAULT = 1;
