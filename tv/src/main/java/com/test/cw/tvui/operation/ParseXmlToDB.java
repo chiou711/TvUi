@@ -197,7 +197,7 @@ public class ParseXmlToDB {
             // parse finished, set flags
             isParsing = false;
             if(MainFragment.isNewDB &&
-               DB_folder.getFocusFolder_tableId() == Define.ORIGIN_FOLDERS_COUNT)
+               DB_folder.getFocusFolder_tableId() == Define.DEFAULT_XML_FILES_COUNT)
             {
                 MainFragment.isNewDB = false;
                 // set preference

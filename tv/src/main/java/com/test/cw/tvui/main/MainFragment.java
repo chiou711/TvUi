@@ -41,8 +41,10 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.BaseInputConnection;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,8 +60,8 @@ public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
 
     private static final int BACKGROUND_UPDATE_DELAY = 300;
-    private static final int GRID_ITEM_WIDTH = 200;
-    private static final int GRID_ITEM_HEIGHT = 200;
+    private static final int GRID_ITEM_WIDTH = 100;//200;
+    private static final int GRID_ITEM_HEIGHT = 100;//200;
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -272,6 +274,7 @@ public class MainFragment extends BrowseFragment {
     static int currFolderNum = 1;
     static int currPageId;
     static int currLinkId;
+    boolean isKeyEventConsumed;
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -290,56 +293,55 @@ public class MainFragment extends BrowseFragment {
 //                getActivity().startActivity(intent, bundle);
 
                 //Launch YouTube by item view click
-                currPageId = (int)row.getId();
-                currLinkId = (int)movie.getId();
-
-                DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
-                db_folder.open();
-                int len = db_folder.getPagesCount(false);
-                db_folder.close();
-
-                // get real link Id in row
-//                for(int i = 0; i< currPageId; i++) {
-                for(int i = 0; i< len; i++) {
-
-//                    DB_folder db_folder = new DB_folder(MainActivity.mAct,1);
-//                    DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
-                    int page_table = db_folder.getPageTableId(i,true);
-
-                    DB_page db_page = new DB_page(MainActivity.mAct,page_table);
-                    db_page.open();
-                    int length = db_page.getNotesCount(false);
-                    db_page.close();
-                    System.out.println("MainFragment / _onItemClicked / length ("+i+")= "+ length);
-
-                    currLinkId -= length;
-                }
-                System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
-                System.out.println("MainFragment / _onItemClicked / currLinkId = "+ currLinkId);
                 String id = Util.getYoutubeId(movie.getVideoUrl());
                 System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                 intent.putExtra("force_fullscreen",true);
                 intent.putExtra("finish_on_ended",true);
 
-                // Play once
-                getActivity().startActivity(intent);
+                if(Define.AUTO_PLAY_NEXT)
+                {
+                    currPageId = (int)row.getId();
+                    currLinkId = (int)movie.getId();
 
-                // Continue play
-//                getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+                    DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
 
+                    // get real link Id in row
+                    for(int i = 0; i< currPageId; i++)
+                    {
+                        int page_table = db_folder.getPageTableId(i,true);
+                        DB_page db_page = new DB_page(MainActivity.mAct,page_table);
+                        db_page.open();
+                        int length = db_page.getNotesCount(false);
+                        db_page.close();
+                        System.out.println("MainFragment / _onItemClicked / length ("+i+")= "+ length);
+
+                        currLinkId -= length;
+                    }
+                    System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
+                    System.out.println("MainFragment / _onItemClicked / currLinkId in row = "+ currLinkId);
+
+                    // Continue play
+                    getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+                }
+                else
+                {
+                    // Play once
+                    getActivity().startActivity(intent);
+                }
             }
             else if (item instanceof String)
             {
 //                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
 //                if (((String) item).contains(getString(R.string.error_fragment)))
 
-                currFolderNum = Util.getNumberInString(((String) item));
-                setupUIElements();
-                loadItemsByDB(currFolderNum);
-                setupEventListeners();
                 //bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
                 //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
+                currFolderNum = Util.getNumberInString(((String) item));
+//                setupUIElements();
+                loadItemsByDB(currFolderNum);
+//                setupEventListeners();
+                isKeyEventConsumed = false;
             }
         }
     }
@@ -357,19 +359,22 @@ public class MainFragment extends BrowseFragment {
             {
 //                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
 //                if (((String) item).contains(getString(R.string.error_fragment)))
-                if (((String) item).contains("1st"))
+
+                // workaround: since no way to set focus for selected item yet
+                if(!isKeyEventConsumed)
                 {
+                    BaseInputConnection  mInputConnection = new BaseInputConnection(itemViewHolder.view.getRootView(), true);
+                    for(int i=1;i<currFolderNum;i++) {
+                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, 22));
+                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, 22));
+                    }
+                    isKeyEventConsumed = true;
                 }
-                else if (((String) item).contains("2nd"))
-                {
-//                    ((TextView)itemViewHolder.view).setText("<2nd>");
-                }
-                else if (((String) item).contains("3rd"))
-                {
-                }
+
             }
 
         }
+
     }
 
 //    private class UpdateBackgroundTask extends TimerTask {
@@ -395,7 +400,8 @@ public class MainFragment extends BrowseFragment {
             view.setLayoutParams(new ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT));
             view.setFocusable(true);
             view.setFocusableInTouchMode(true);
-            view.setBackgroundColor(getResources().getColor(R.color.default_background));
+//            view.setBackgroundColor(getResources().getColor(R.color.default_background));
+            view.setBackgroundColor(getResources().getColor(R.color.bar_color));
             view.setTextColor(Color.WHITE);
             view.setGravity(Gravity.CENTER);
             return new ViewHolder(view);
@@ -410,7 +416,8 @@ public class MainFragment extends BrowseFragment {
             if(folderNum == currFolderNum)
                 viewHolder.view.setBackgroundColor(getResources().getColor(R.color.search_opaque));
             else
-                viewHolder.view.setBackgroundColor(getResources().getColor(R.color.default_background ));
+                viewHolder.view.setBackgroundColor(getResources().getColor(R.color.bar_color));
+
         }
 
         @Override
@@ -428,7 +435,7 @@ public class MainFragment extends BrowseFragment {
         {
             setupUIElements();
             loadItemsByDB(DB_folder.getFocusFolder_tableId());
-            setupEventListeners();
+//            setupEventListeners();
         }
     }
 }

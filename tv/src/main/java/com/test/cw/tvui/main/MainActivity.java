@@ -105,50 +105,57 @@ public class MainActivity extends Activity {
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == MovieList.REQUEST_CONTINUE_PLAY)
+
+        if(Define.AUTO_PLAY_NEXT)
         {
-            MainFragment.currLinkId++;
+            if (requestCode == MovieList.REQUEST_CONTINUE_PLAY) {
+                MainFragment.currLinkId++;
+                System.out.println("MainActivity / _onActivityResult / MainFragment.currLinkId = " + MainFragment.currLinkId);
 
-            // page
-            DB_folder db_folder = new DB_folder(this,1);
-            int pageTableId = db_folder.getPageTableId(MainFragment.currPageId,true);
+                // page
+                DB_folder db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId());
+                int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
 
-            // link
-            DB_page db_page = new DB_page(MainActivity.mAct,pageTableId);
-            db_page.open();
-            int linksLen = db_page.getNotesCount(false);
-            db_page.close();
+                // link
+                DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
+                db_page.open();
+                int linksLen = db_page.getNotesCount(false);
+                db_page.close();
+                System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
 
-            System.out.println("MainActivity / _onActivityResult / linksLen = " + linksLen);
-            // meet boundary
-            if(MainFragment.currLinkId >= linksLen)
-            {
-                MainFragment.currPageId++;
-                MainFragment.currLinkId =0;
+                // meet boundary
+                if (MainFragment.currLinkId >= linksLen) {
+                    MainFragment.currPageId++;
+                    MainFragment.currLinkId = 0;
+                }
+
+                // new page
+                db_folder = new DB_folder(this, DB_folder.getFocusFolder_tableId()); //1
+                db_folder.open();
+                int pagesLen = db_folder.getPagesCount(false);
+                db_folder.close();
+
+                if (MainFragment.currPageId >= pagesLen)
+                    MainFragment.currPageId = 0;
+
+                System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
+                System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
+
+                // link
+                pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
+                db_page = new DB_page(mAct, pageTableId);
+                String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
+
+                // intent
+                String id = Util.getYoutubeId(urlStr);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                intent.putExtra("force_fullscreen", true);
+                intent.putExtra("finish_on_ended", true);
+                startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
             }
-            System.out.println("MainActivity / _onActivityResult / currPageId = " + MainFragment.currPageId);
-            System.out.println("MainActivity / _onActivityResult / currLinkId = " + MainFragment.currLinkId);
-
-            // new page
-            db_folder = new DB_folder(this,DB_folder.getFocusFolder_tableId()); //1
-            db_folder.open();
-            int pagesLen = db_folder.getPagesCount(false);
-            db_folder.close();
-
-            if(MainFragment.currPageId >= pagesLen)
-                MainFragment.currPageId = 0;
-
-            // link
-            pageTableId = db_folder.getPageTableId(MainFragment.currPageId,true);
-            db_page = new DB_page(mAct,pageTableId);
-            String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId,true);
-            String id = Util.getYoutubeId(urlStr);
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-            intent.putExtra("force_fullscreen",true);
-            intent.putExtra("finish_on_ended",true);
-            startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
         }
     }
 
@@ -182,4 +189,18 @@ public class MainActivity extends Activity {
         }
 
     }
+
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//
+//        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+//            System.out.println("Key down, code " + event.getKeyCode());
+//
+//        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+//            System.out.println("Key up, code " + event.getKeyCode());
+//        }
+//
+//        return false;
+//    }
+
 }
