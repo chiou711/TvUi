@@ -12,22 +12,27 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.zNoUse;
 
-import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
+import android.app.Activity;
+import android.os.Bundle;
 
-import com.test.cw.tvui.main.Movie;
+import com.test.cw.tvui.R;
 
-public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
+/*
+ * Details activity class that loads LeanbackDetailsFragment class
+ */
+public class DetailsActivity extends Activity {
+    public static final String SHARED_ELEMENT_NAME = "hero";
+    public static final String MOVIE = "Movie";
 
+    /**
+     * Called when the activity is first created.
+     */
     @Override
-    protected void onBindDescription(ViewHolder viewHolder, Object item) {
-        Movie movie = (Movie) item;
-
-        if (movie != null) {
-            viewHolder.getTitle().setText(movie.getTitle());
-            viewHolder.getSubtitle().setText(movie.getStudio());
-            viewHolder.getBody().setText(movie.getDescription());
-        }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_details);
     }
+
 }

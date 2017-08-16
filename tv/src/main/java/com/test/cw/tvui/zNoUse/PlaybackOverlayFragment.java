@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui;
+package com.test.cw.tvui.zNoUse;
 
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
@@ -51,6 +51,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.test.cw.tvui.R;
 import com.test.cw.tvui.main.CardPresenter;
 import com.test.cw.tvui.main.Movie;
 import com.test.cw.tvui.main.MovieList;

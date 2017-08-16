@@ -11,11 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.test.cw.tvui;
+package com.test.cw.tvui.zNoUse;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
+import com.test.cw.tvui.R;
 
 /*
  * This class demonstrates how to extend ErrorFragment

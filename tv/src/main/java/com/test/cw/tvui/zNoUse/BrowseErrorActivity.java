@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.test.cw.tvui;
+package com.test.cw.tvui.zNoUse;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+
+import com.test.cw.tvui.R;
 
 /*
  * BrowseErrorActivity shows how to use ErrorFragment
