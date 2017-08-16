@@ -183,18 +183,9 @@ public class VideoDetailsFragment extends DetailsFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
-//                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
-//                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
-//                    startActivity(intent);
-                    ///
-                    //TODO: launch YouTube by detailsPresenter button click
-                    String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-//           		intent.putExtra("force_fullscreen",true);
-//        			intent.putExtra("finish_on_ended",true);
+                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
                     startActivity(intent);
-                    ///
-
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }

@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
@@ -45,6 +46,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.BaseInputConnection;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,7 +74,7 @@ public class MainFragment extends BrowseFragment {
     private BackgroundManager mBackgroundManager;
     public static AlertDialog alertDlg;
     public static boolean isNewDB;
-
+    View rootView;
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
@@ -92,7 +94,7 @@ public class MainFragment extends BrowseFragment {
         isNewDB = !Util.getPref_has_default_import(getActivity(),0);
         if(isNewDB) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle("Will load data items")
+            builder.setTitle("Will load data items")//TODO local
                    .setMessage("It takes a period to load completely.")
                    .setNegativeButton("Wait", listener_wait)
                    .setPositiveButton("No", null);
@@ -102,22 +104,20 @@ public class MainFragment extends BrowseFragment {
             alertDlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    loadItemsByDB(1);
-                    setupEventListeners();
+                    loadItemsAsync(1);
                 }
             });
         }
         else
         {
-            loadItemsByDB(1);
-            setupEventListeners();
+            loadItemsAsync(1);
         }
     }
 
     DialogInterface.OnClickListener listener_wait = new DialogInterface.OnClickListener(){
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();//??? not show
+            Toast.makeText(getActivity(),"Wait",Toast.LENGTH_LONG).show();//??? not show //TODO local
         }
     };
 
@@ -132,7 +132,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     // load items by DB
-    void loadItemsByDB(int folderTableId)
+    public void loadItemsByDB(int folderTableId)
     {
         System.out.println("MainFragment / _loadItemsByDB / folderTableId = " + folderTableId);
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
@@ -144,7 +144,7 @@ public class MainFragment extends BrowseFragment {
         int countRows = 0;
 
         // other
-        HeaderItem gridHeader = new HeaderItem(countRows, "Folders");
+        HeaderItem gridHeader = new HeaderItem(countRows, "Folders"); //TODO local
         GridItemPresenter gridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
 
@@ -201,7 +201,7 @@ public class MainFragment extends BrowseFragment {
         }
 
         // set adapter
-        setAdapter(mRowsAdapter);
+//        setAdapter(mRowsAdapter);
     }
 
 //    private void prepareBackgroundManager() {
@@ -227,7 +227,7 @@ public class MainFragment extends BrowseFragment {
         setSearchAffordanceColor(getResources().getColor(R.color.search_opaque));
     }
 
-    private void setupEventListeners() {
+    public void setupEventListeners() {
         System.out.println("MainFragment / _setupEventListeners");
 
         // Search Click
@@ -344,9 +344,8 @@ public class MainFragment extends BrowseFragment {
                 //bug: BrowseFragment onItemClicked callbacks broken in 25.3.0
                 //cf https://stackoverflow.com/questions/44049813/android-tv-rowsfragment-item-click-not-working-in-few-cases
                 currFolderNum = Util.getNumberInString(((String) item));
-//                setupUIElements();
-                loadItemsByDB(currFolderNum);
-                setupEventListeners();
+                setupUIElements();
+                loadItemsAsync(currFolderNum);
                 isKeyEventConsumed = false;
             }
         }
@@ -440,8 +439,62 @@ public class MainFragment extends BrowseFragment {
         if(requestCode == MovieList.REQUEST_IMPORT)
         {
             setupUIElements();
-            loadItemsByDB(DB_folder.getFocusFolder_tableId());
-            setupEventListeners();
+            loadItemsAsync(DB_folder.getFocusFolder_tableId());
         }
+    }
+
+    boolean isLoading;
+    private class LoadItemAsyncTask extends AsyncTask<Void, Integer, Void> {
+
+        int folderNum;
+        LoadItemAsyncTask(int folderNum)
+        {
+            this.folderNum = folderNum;
+        }
+        ProgressBar bar;
+        public void setProgressBar(ProgressBar bar) {
+            isLoading = true;
+            this.bar = bar;
+            bar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            if (this.bar != null) {
+                bar.setProgress(values[0]);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            loadItemsByDB(folderNum);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            bar.setVisibility(View.GONE);
+            // set adapter
+            setAdapter(mRowsAdapter);
+            setupEventListeners();
+            rootView.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+
+    void loadItemsAsync(int folderNum)
+    {
+        ProgressBar progressBar = (ProgressBar) getActivity().findViewById(R.id.load_progress);
+        progressBar.setVisibility(View.VISIBLE);
+        rootView = getActivity().findViewById(R.id.main_browse_fragment);
+        rootView.setVisibility(View.GONE);
+
+        LoadItemAsyncTask loadItemTask = new LoadItemAsyncTask(folderNum);
+        loadItemTask.setProgressBar(progressBar);
+        loadItemTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }
