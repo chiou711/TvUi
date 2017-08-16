@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
     /**
      * Called when the activity is first created.
      */
-    public static Activity mAct;
+    public Activity act;
     Context context;
     final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 98;
 
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mAct = this;
+        act = this;
         context = getApplicationContext();
 
 
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
             {
                 final boolean ENABLE_DB_CHECK = false;//true;//false
                 if(ENABLE_DB_CHECK)
-                    Folder.listAllPageTables(mAct);
+                    Folder.listAllPageTables(act);
             }
         }
         else
@@ -169,7 +169,7 @@ public class MainActivity extends Activity {
         int pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
 
         // link
-        DB_page db_page = new DB_page(MainActivity.mAct, pageTableId);
+        DB_page db_page = new DB_page(act, pageTableId);
         db_page.open();
         int linksLen = db_page.getNotesCount(false);
         db_page.close();
@@ -195,7 +195,7 @@ public class MainActivity extends Activity {
 
         // link
         pageTableId = db_folder.getPageTableId(MainFragment.currPageId, true);
-        db_page = new DB_page(mAct, pageTableId);
+        db_page = new DB_page(act, pageTableId);
         String urlStr = db_page.getNoteLinkUri(MainFragment.currLinkId, true);
         return urlStr;
     }
@@ -254,7 +254,7 @@ public class MainActivity extends Activity {
         if(Define.HAS_PREFERENCE)
         {
             // Check preference and Create default tables
-            if( !Util.getPref_has_default_import(mAct,0) )
+            if( !Util.getPref_has_default_import(act,0) )
             {
                 for(int i=1;i<=Define.ORIGIN_FOLDERS_COUNT;i++)
                 {
@@ -262,7 +262,7 @@ public class MainActivity extends Activity {
                     DB_folder.setFocusFolder_tableId(i);
 
                     // import default tables
-                    Import_fileView.createDefaultTables(mAct, i);
+                    Import_fileView.createDefaultTables(act, i);
                 }
             }
             else

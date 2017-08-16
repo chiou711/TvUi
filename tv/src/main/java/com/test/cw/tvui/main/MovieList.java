@@ -1,5 +1,7 @@
 package com.test.cw.tvui.main;
 
+import android.app.Activity;
+
 import com.test.cw.tvui.db.DB_folder;
 import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.util.Util;
@@ -11,10 +13,10 @@ public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
     static int REQUEST_IMPORT = 998;
     public static List<Movie> list;
-    static List<Movie> setupMoviesByDB(int pagePosition)
+    static List<Movie> setupMoviesByDB(Activity act,int pagePosition)
     {
         int pageTableId;
-        DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
+        DB_folder db_folder = new DB_folder(act,DB_folder.getFocusFolder_tableId());
         pageTableId = db_folder.getPageTableId(pagePosition,true);
         list = new ArrayList<>();
 
@@ -22,7 +24,7 @@ public final class MovieList {
         String description = "Movie description: oxoxoxox....";
 
         // URL list
-        DB_page db_page = new DB_page(MainActivity.mAct,pageTableId);
+        DB_page db_page = new DB_page(act,pageTableId);
         db_page.open();
         int len = db_page.getNotesCount(false);
         db_page.close();

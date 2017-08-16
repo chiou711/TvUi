@@ -3,7 +3,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.test.cw.tvui.main.MainActivity;
 import com.test.cw.tvui.preference.Define;
 
 // Data Base Helper
@@ -11,10 +10,12 @@ class DatabaseHelper extends SQLiteOpenHelper
 {  
     static final String DB_NAME = "tvui.db";
     private static int DB_VERSION = 1;
+	private Context context;
     
     DatabaseHelper(Context context)
-    {  
+    {
         super(context, DB_NAME , null, DB_VERSION);
+		this.context = context;
     }
 
     @Override
@@ -55,7 +56,7 @@ class DatabaseHelper extends SQLiteOpenHelper
 		// Create Folder tables
 		for(int i = 1; i<= Define.ORIGIN_FOLDERS_COUNT; i++)
 		{
-			DB_drawer db_drawer = new DB_drawer(MainActivity.mAct);
+			DB_drawer db_drawer = new DB_drawer(context);
 			db_drawer.insertFolderTable(db_drawer, i, true);
 		}
 
@@ -68,7 +69,7 @@ class DatabaseHelper extends SQLiteOpenHelper
 	        	for(int j = 1; j<= Define.ORIGIN_PAGES_COUNT; j++)
 	        	{
 	            	System.out.println("DatabaseHelper / _onCreate / will insert note table " + j);
-					DB_folder db_folder = new DB_folder(MainActivity.mAct,i);
+					DB_folder db_folder = new DB_folder(context,i);
 					db_folder.insertPageTable(db_folder, i, j, true);
 	        	}
 	    	}

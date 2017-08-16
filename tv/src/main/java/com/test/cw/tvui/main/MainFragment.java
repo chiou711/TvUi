@@ -89,7 +89,7 @@ public class MainFragment extends BrowseFragment {
         Import_fileView.isAddingNewFolder = false;
 
         // dialog for Continue loading
-        isNewDB = !Util.getPref_has_default_import(MainActivity.mAct,0);
+        isNewDB = !Util.getPref_has_default_import(getActivity(),0);
         if(isNewDB) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle("Will load data items")
@@ -172,7 +172,7 @@ public class MainFragment extends BrowseFragment {
             // Page
             String pageTitle = db_folder.getPageTitle(i,true);
 
-            List<Movie> list = MovieList.setupMoviesByDB(i);
+            List<Movie> list = MovieList.setupMoviesByDB(getActivity(),i);
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
 
             // pages
@@ -296,7 +296,7 @@ public class MainFragment extends BrowseFragment {
                 {
                     currPageId = (int)row.getId();
 
-                    DB_folder db_folder = new DB_folder(MainActivity.mAct,DB_folder.getFocusFolder_tableId());
+                    DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
                     int pageTableId = db_folder.getPageTableId(currPageId,true);
 
                     DB_page db_page = new DB_page(getActivity(),pageTableId);

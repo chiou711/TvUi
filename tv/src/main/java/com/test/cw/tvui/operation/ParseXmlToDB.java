@@ -1,8 +1,8 @@
 package com.test.cw.tvui.operation;
 
+import android.app.Activity;
 import android.content.Context;
 
-import com.test.cw.tvui.main.MainActivity;
 import com.test.cw.tvui.main.MainFragment;
 import com.test.cw.tvui.util.Util;
 import com.test.cw.tvui.db.DB_folder;
@@ -25,12 +25,13 @@ public class ParseXmlToDB {
     private boolean mEnableInsertDB = true;
     private DB_folder mDb_folder;
     private DB_page mDb_page;
+    private Activity act;
 
     // constructor
     public ParseXmlToDB(Context context, FileInputStream fileInputStream)
     {
 	    this.fileInputStream = fileInputStream;
-
+        act = (Activity) context;
 	    int folderTableId = DB_folder.getFocusFolder_tableId();//Util.getPref_lastTimeView_folder_tableId(mContext);
 	    mDb_folder = new DB_folder(context, folderTableId);
 
@@ -110,85 +111,82 @@ public class ParseXmlToDB {
                     }
 		            break;
 
-	            case XmlPullParser.TEXT:
-			       text = parser.getText();
-	            break;
+                    case XmlPullParser.TEXT:
+                       text = parser.getText();
+                    break;
 
-	            case XmlPullParser.END_TAG:
-		            if(name.equals("page_name"))
-		            {
-	                    pageName = text.trim();
-
-					    //Add page
-                        if(mEnableInsertDB)
+                    case XmlPullParser.END_TAG:
+                        if(name.equals("page_name"))
                         {
-                            lastPageTableId++;
-                            DB_page.setFocusPage_tableId(lastPageTableId);
+                            pageName = text.trim();
 
-                            // style is not set in XML file, so insert default style instead
-                            int style = 0;
-                            long insertedPageId = mDb_folder.insertPage(DB_folder.getFocusFolder_tableName(),
-                                                                pageName,
-                                                                lastPageTableId,
-                                                                style );
-                            System.out.println("insertedPageId = " + insertedPageId);
-                            System.out.println("lastPageTableId = " + lastPageTableId);
+                            //Add page
+                            if(mEnableInsertDB)
+                            {
+                                lastPageTableId++;
+                                DB_page.setFocusPage_tableId(lastPageTableId);
 
-                            // insert new page table
-                            mDb_folder.insertPageTable(mDb_folder,folderTableId, lastPageTableId, false );
+                                // style is not set in XML file, so insert default style instead
+                                int style = 0;
+                                long insertedPageId = mDb_folder.insertPage(DB_folder.getFocusFolder_tableName(),
+                                                                    pageName,
+                                                                    lastPageTableId,
+                                                                    style );
+                                System.out.println("insertedPageId = " + insertedPageId);
+                                System.out.println("lastPageTableId = " + lastPageTableId);
+
+                                // insert new page table
+                                mDb_folder.insertPageTable(mDb_folder,folderTableId, lastPageTableId, false );
+                            }
+
+                            fileBody = fileBody.concat(Util.NEW_LINE + "=== " + "Page:" + " " + pageName + " ===");
                         }
+                        else if(name.equals("title"))
+                        {
+                            text = text.replace("[n]"," ");
+                            text = text.replace("[s]"," ");
+                            title = text.trim();
+                        }
+                        else if(name.equals("body"))
+                        {
+                            body = text.trim();
+                        }
+                        else if(name.equals("picture"))
+                        {
+                            picture = text.trim();
+                        }
+                        else if(name.equals("audio"))
+                        {
+                            audio = text.trim();
+                        }
+                        else if(name.equals("link"))
+                        {
+                            link = text.trim();
+                            if(mEnableInsertDB)
+                            {
+                                DB_page.setFocusPage_tableId(lastPageTableId);
+                                //Add links
+                                if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
+                                {
+                                    // apply title for saving time
+                                    if(Util.isEmptyString(title))
+                                        title = Util.getYouTubeTitle(link);
 
-		        	    fileBody = fileBody.concat(Util.NEW_LINE + "=== " + "Page:" + " " + pageName + " ===");
-	                }
-	                else if(name.equals("title"))
-	                {
-		                text = text.replace("[n]"," ");
-		                text = text.replace("[s]"," ");
-		                title = text.trim();
-		            }
-	                else if(name.equals("body"))
-	                {
-	            	    body = text.trim();
-	                }
-	                else if(name.equals("picture"))
-	                {
-	            	    picture = text.trim();
-	                }
-	                else if(name.equals("audio"))
-	                {
-	            	    audio = text.trim();
-				    }
-	                else if(name.equals("link"))
-	                {
-	            	    link = text.trim();
-	            	    if(mEnableInsertDB)
-	            	    {
-		            	    DB_page.setFocusPage_tableId(lastPageTableId);
-						    //Add links
-		            	    if(title.length() !=0 || body.length() != 0 || picture.length() !=0 || audio.length() !=0 ||link.length() !=0)
-		            	    {
-                                // apply title for saving time
-                                if(Util.isEmptyString(title))
-                                    title = Util.getYouTubeTitle(link);
-
-//                                if((!Util.isEmptyString(picture)) || (!Util.isEmptyString(audio)))
-//                                    mDb_page.insertNote(title, picture, audio, "", link, body,1, (long) 0); // add mark for media
-//                                else
-                                long returnedNoteId = mDb_page.insertNote(title, picture, audio, "", link, body,0, (long) 0);
-                                System.out.println("just insert note: returnedNoteId = " + returnedNoteId +
-                                                    ", title = " + title +
-                                                    ", link = " + link        );
-		            	    }
-	            	    }
-		                fileBody = fileBody.concat(Util.NEW_LINE + strSplitter);
-		                fileBody = fileBody.concat(Util.NEW_LINE + "title:" + " " + title);
-		        	    fileBody = fileBody.concat(Util.NEW_LINE + "body:" + " " + body);
-		        	    fileBody = fileBody.concat(Util.NEW_LINE + "picture:" + " " + picture);
-		        	    fileBody = fileBody.concat(Util.NEW_LINE + "audio:" + " " + audio);
-		        	    fileBody = fileBody.concat(Util.NEW_LINE + "link:" + " " + link);
-	            	    fileBody = fileBody.concat(Util.NEW_LINE);
-	                }
-	                break;
+                                    long returnedNoteId = mDb_page.insertNote(title, picture, audio, "", link, body,0, (long) 0);
+                                    System.out.println("just insert note: returnedNoteId = " + returnedNoteId +
+                                                        ", title = " + title +
+                                                        ", link = " + link        );
+                                }
+                            }
+                            fileBody = fileBody.concat(Util.NEW_LINE + strSplitter);
+                            fileBody = fileBody.concat(Util.NEW_LINE + "title:" + " " + title);
+                            fileBody = fileBody.concat(Util.NEW_LINE + "body:" + " " + body);
+                            fileBody = fileBody.concat(Util.NEW_LINE + "picture:" + " " + picture);
+                            fileBody = fileBody.concat(Util.NEW_LINE + "audio:" + " " + audio);
+                            fileBody = fileBody.concat(Util.NEW_LINE + "link:" + " " + link);
+                            fileBody = fileBody.concat(Util.NEW_LINE);
+                        }
+                        break;
 	            }
         	    event = parser.next();
             }
@@ -201,7 +199,7 @@ public class ParseXmlToDB {
             {
                 MainFragment.isNewDB = false;
                 // set preference
-                Util.setPref_has_default_import(MainActivity.mAct,true,0);
+                Util.setPref_has_default_import(act,true,0);
             }
             else
                 MainFragment.isNewDB = true;

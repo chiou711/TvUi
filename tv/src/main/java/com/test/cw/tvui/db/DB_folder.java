@@ -15,8 +15,8 @@ import java.util.Date;
 public class DB_folder
 {
 
-    private Context mContext = null;
-    private static DatabaseHelper mDbHelper ;
+    private Context context = null;
+    private DatabaseHelper dB_helper;
     static SQLiteDatabase mSqlDb;
 
 	// Table name format: Folder1
@@ -42,7 +42,7 @@ public class DB_folder
     /** Constructor */
 	public DB_folder(Context context, int folderTableId)
 	{
-		mContext = context;
+		this.context = context;
 		setFocusFolder_tableId(folderTableId);
 	}
 
@@ -52,10 +52,10 @@ public class DB_folder
      */
 	public DB_folder open() throws SQLException
 	{
-		mDbHelper = new DatabaseHelper(mContext);
+		dB_helper = new DatabaseHelper(context);
 
 		// Will call DatabaseHelper.onCreate()first time when WritableDatabase is not created yet
-		mSqlDb = mDbHelper.getWritableDatabase();
+		mSqlDb = dB_helper.getWritableDatabase();
 
         try
         {
@@ -66,12 +66,12 @@ public class DB_folder
 //            if( mCursor_page.getCount() == 0)
 //            {
 //                if(Define.HAS_PREFERENCE )//&&
-////                   !Util.getPref_has_default_import(MainActivity.mAct,MainAct.mFocus_folderPos) )
+////                   !Util.getPref_has_default_import(MainActivity.act,MainAct.mFocus_folderPos) )
 //                {
 //                    // importing preference
 //                }
 //                else {
-//                    DB_drawer db_drawer = new DB_drawer(mContext);
+//                    DB_drawer db_drawer = new DB_drawer(context);
 //                    int folderId = (int) db_drawer.getFolderId(0);//MainActivity.mFocus_folderPos);
 //                    // since the com.test.cw.tvui.folder table does not exist, delete the com.test.cw.tvui.folder Id in drawer table
 //                    db_drawer.deleteFolderId(folderId);
@@ -81,7 +81,7 @@ public class DB_folder
         catch (Exception e)
         {
             System.out.println("DB_folder / open com.test.cw.tvui.folder table NG! / table id = " + getFocusFolder_tableId());
-//            DB_drawer db_drawer = new DB_drawer(mContext);
+//            DB_drawer db_drawer = new DB_drawer(context);
 //            int folderId =  (int) db_drawer.getFolderId(0);//MainAct.mFocus_folderPos);
 //            // since the com.test.cw.tvui.folder table does not exist, delete the com.test.cw.tvui.folder Id in drawer table
 //            db_drawer.deleteFolderId(folderId);
@@ -94,7 +94,7 @@ public class DB_folder
 	{
         if((mCursor_page != null) && (!mCursor_page.isClosed()))
             mCursor_page.close();
-		mDbHelper.close();
+		dB_helper.close();
 	}
 
     //insert new page table by

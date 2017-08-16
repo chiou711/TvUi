@@ -18,8 +18,8 @@ import java.util.Date;
 public class DB_drawer
 {
 
-    private Context mContext = null;
-    private static DatabaseHelper mDbHelper ;
+    private Context context = null;
+    private DatabaseHelper dB_helper;
     static SQLiteDatabase mSqlDb;
 
     // Table name format: Drawer
@@ -41,7 +41,7 @@ public class DB_drawer
     /** Constructor */
 	public DB_drawer(Context context)
     {
-        mContext = context;
+        this.context = context;
     }
 
     /**
@@ -50,10 +50,10 @@ public class DB_drawer
      */
 	public DB_drawer open() throws SQLException
 	{
-		mDbHelper = new DatabaseHelper(mContext);
+		dB_helper = new DatabaseHelper(context);
 
 		// Will call DatabaseHelper.onCreate()first time when WritableDatabase is not created yet
-		mSqlDb = mDbHelper.getWritableDatabase();
+		mSqlDb = dB_helper.getWritableDatabase();
 //        mCursor_folder = this.getFolderCursor(); //no drawer table is created, don't need this
 		return DB_drawer.this;
 	}
@@ -62,22 +62,22 @@ public class DB_drawer
 	{
         if((mCursor_folder != null) && (!mCursor_folder.isClosed()))
             mCursor_folder.close();
-		mDbHelper.close();
+		dB_helper.close();
 	}
 
     // delete DB
 	public void deleteDB()
 	{
-        mSqlDb = mDbHelper.getWritableDatabase();
+        mSqlDb = dB_helper.getWritableDatabase();
         try {
 	    	mSqlDb.beginTransaction();
-	        mContext.deleteDatabase(DatabaseHelper.DB_NAME);
+	        context.deleteDatabase(DatabaseHelper.DB_NAME);
 	        mSqlDb.setTransactionSuccessful();
 	    }
 	    catch (Exception e) {
 	    }
 	    finally {
-//	    	Toast.makeText(mContext,R.string.config_delete_DB_toast,Toast.LENGTH_SHORT).show();
+//	    	Toast.makeText(context,R.string.config_delete_DB_toast,Toast.LENGTH_SHORT).show();
 	    	mSqlDb.endTransaction();
 	    }
 	}
@@ -109,7 +109,7 @@ public class DB_drawer
 	    		String folder_table = DB_FOLDER_TABLE_PREFIX.concat(String.valueOf(id));
 //        		DB_folder.insertPage(mSqlDb,
 //                          folder_table,
-//                          "New page",//"Define.getTabTitle(MainActivity.mAct,1),
+//                          "New page",//"Define.getTabTitle(MainActivity.act,1),
 //                          1,
 //                          Define.STYLE_PREFER);
 	        }
@@ -119,7 +119,7 @@ public class DB_drawer
         	String folder_table = DB_FOLDER_TABLE_PREFIX.concat(String.valueOf(id));
 //        	DB_folder.insertPage(mSqlDb,
 //                      folder_table,
-//                      "local",//Define.getTabTitle(MainActivity.mAct,1),
+//                      "local",//Define.getTabTitle(MainActivity.act,1),
 //                      1,
 //                      Define.STYLE_DEFAULT);
         	//insertPage(mSqlDb,folder_table,"N2",2,1);
