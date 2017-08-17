@@ -167,6 +167,8 @@ public class MainFragment extends BrowseFragment {
         System.out.println("MainFragment / _loadItemsByDB / pagesCount = " + pagesCount);
         db_folder.close();
 
+        setCurrPagesLength(pagesCount);
+
         for(int i = 0; i< pagesCount; i++)
         {
             // Page
@@ -302,6 +304,7 @@ public class MainFragment extends BrowseFragment {
                     DB_page db_page = new DB_page(getActivity(),pageTableId);
                     db_page.open();
                     int linksCount = db_page.getNotesCount(false);
+                    setCurrLinksLength(linksCount);
                     db_page.close();
 
                     // get real link Id in row
@@ -322,6 +325,8 @@ public class MainFragment extends BrowseFragment {
 
                     // Continue play
                     getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
+
+                    isKeyEventConsumed = false;
                 }
                 else
                 {
@@ -358,6 +363,7 @@ public class MainFragment extends BrowseFragment {
             if (item instanceof Movie) {
 //                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
 //                startBackgroundTimer();
+                // workaround: since no way to set focus for selected item yet
             }
 
             if (item instanceof String)
@@ -443,9 +449,7 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    boolean isLoading;
     private class LoadItemAsyncTask extends AsyncTask<Void, Integer, Void> {
-
         int folderNum;
         LoadItemAsyncTask(int folderNum)
         {
@@ -453,7 +457,6 @@ public class MainFragment extends BrowseFragment {
         }
         ProgressBar bar;
         public void setProgressBar(ProgressBar bar) {
-            isLoading = true;
             this.bar = bar;
             bar.setVisibility(View.VISIBLE);
         }
@@ -496,5 +499,32 @@ public class MainFragment extends BrowseFragment {
         LoadItemAsyncTask loadItemTask = new LoadItemAsyncTask(folderNum);
         loadItemTask.setProgressBar(progressBar);
         loadItemTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+
+    // setter for current links length
+    static int currentLinksLength;
+    void setCurrLinksLength(int len)
+    {
+        this.currentLinksLength = len;
+    }
+
+    // getter for current links length
+    static int getCurrLinksLength()
+    {
+        return currentLinksLength;
+    }
+
+    // setter for current pages length
+    static int currentPagesLength;
+    void setCurrPagesLength(int len)
+    {
+        this.currentPagesLength = len;
+    }
+
+    // getter for current pages length
+    static int getCurrPagesLength()
+    {
+        return currentPagesLength;
     }
 }

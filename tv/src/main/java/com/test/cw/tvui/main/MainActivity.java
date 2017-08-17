@@ -22,11 +22,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
+import android.view.inputmethod.BaseInputConnection;
 import android.widget.TextView;
 
 import com.test.cw.tvui.R;
@@ -37,6 +40,11 @@ import com.test.cw.tvui.folder.Folder;
 import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
+
+import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
+import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
+import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
+import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 
 /*
  * MainActivity class that loads MainFragment
@@ -125,7 +133,7 @@ public class MainActivity extends Activity {
                 MainFragment.currLinkId++;
                 System.out.println("MainActivity / _onActivityResult / MainFragment.currLinkId = " + MainFragment.currLinkId);
 
-                count = 2; // waiting time to next
+                count = 3; // waiting time to next
                 builder = new AlertDialog.Builder(this);
 
                 String link = getYouTubeLink();
@@ -232,18 +240,52 @@ public class MainActivity extends Activity {
         }
     };
 
+    int delay = 10;
     /**
      *  launch next YouTube intent
      */
     void launchNextYouTubeIntent()
     {
-        String urlStr = getYouTubeLink();
-        // intent
-        String id = Util.getYoutubeId(urlStr);
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-        intent.putExtra("force_fullscreen", true);
-        intent.putExtra("finish_on_ended", true);
-        startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
+        System.out.println("MainActivity / _launchNextYouTubeIntent / MainFragment.currLinkId = " + MainFragment.currLinkId);
+        System.out.println("MainActivity / _launchNextYouTubeIntent / MainFragment.getCurrLinksLength() = " + MainFragment.getCurrLinksLength());
+//        if(MainFragment.currLinkId >= MainFragment.getCurrLinksLength())
+        //refer: https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_DPAD_DOWN_RIGHT
+
+        // check if at the end of row
+        if(MainFragment.currLinkId == 0)
+        {
+            // from test result current capability is shift left 15 steps only
+            DPadAsyncTask task = new DPadAsyncTask(MainFragment.getCurrLinksLength());
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else
+        {
+            // delay
+            try {
+                Thread.sleep(delay*100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            BaseInputConnection mInputConnection = new BaseInputConnection(findViewById(R.id.main_browse_fragment), true);
+            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_RIGHT));
+            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_RIGHT));
+
+            // delay
+            try {
+                Thread.sleep(delay * 100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            String urlStr = getYouTubeLink();
+            // intent
+            String id = Util.getYoutubeId(urlStr);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+            intent.putExtra("force_fullscreen", true);
+            intent.putExtra("finish_on_ended", true);
+            startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
+        }
     }
 
     void createDB_data()
@@ -283,5 +325,87 @@ public class MainActivity extends Activity {
 //
 //        return false;
 //    }
+
+
+    private class DPadAsyncTask extends AsyncTask<Void, Integer, Void> {
+        int dPadSteps;
+        DPadAsyncTask(int dPadSteps)
+        {
+            this.dPadSteps = dPadSteps;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            BaseInputConnection mInputConnection = new BaseInputConnection(findViewById(R.id.main_browse_fragment), true);
+
+            // point to first item of current row
+            for(int i=0;i<dPadSteps;i++)
+            {
+                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_LEFT));
+                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_LEFT));
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // add delay to make sure key event works
+            try {
+                Thread.sleep(delay * 100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // point to first row if meets the end of last row
+            if(MainFragment.currPageId == 0)
+            {
+                for (int i = (MainFragment.getCurrPagesLength()-1); i >= 1; i--) {
+                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_UP));
+                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_UP));
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            else
+            {
+                // point to next row
+                BaseInputConnection connection = new BaseInputConnection(findViewById(R.id.main_browse_fragment), true);
+                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_DOWN));
+                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_DOWN));
+            }
+
+            // add delay for viewer
+            try {
+                Thread.sleep(delay * 100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            String urlStr = getYouTubeLink();
+            // intent
+            String id = Util.getYoutubeId(urlStr);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+            intent.putExtra("force_fullscreen", true);
+            intent.putExtra("finish_on_ended", true);
+            startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
+        }
+    }
 
 }
