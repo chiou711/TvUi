@@ -282,8 +282,10 @@ public class MainActivity extends Activity {
             // intent
             String id = Util.getYoutubeId(urlStr);
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-            intent.putExtra("force_fullscreen", true);
-            intent.putExtra("finish_on_ended", true);
+            if(Util.getYouTube_verNumber(this) <= 10311100){
+                intent.putExtra("force_fullscreen", true);
+                intent.putExtra("finish_on_ended", true);
+            }
             startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
         }
     }
@@ -402,8 +404,10 @@ public class MainActivity extends Activity {
             // intent
             String id = Util.getYoutubeId(urlStr);
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-            intent.putExtra("force_fullscreen", true);
-            intent.putExtra("finish_on_ended", true);
+            if(Util.getYouTube_verNumber(MainActivity.this) <= 10311100){
+                intent.putExtra("force_fullscreen", true);
+                intent.putExtra("finish_on_ended", true);
+            }
             startActivityForResult(intent, MovieList.REQUEST_CONTINUE_PLAY);
         }
     }

@@ -241,11 +241,13 @@ public class Import_fileListAct extends FragmentActivity
             convertView.setClickable(true);
             TextView tv = (TextView)convertView.findViewById(R.id.text1);
             tv.setText(fileNames.get(position));
-            if(fileNames.get(position).contains("sdcard")   ||
-               fileNames.get(position).contains(appName)    ||
-               fileNames.get(position).contains("LiteNote") ||
-               fileNames.get(position).contains("Download")         )
+            if(fileNames.get(position).equalsIgnoreCase("sdcard")   ||
+               fileNames.get(position).equalsIgnoreCase(appName)    ||
+               fileNames.get(position).equalsIgnoreCase("LiteNote") ||
+               fileNames.get(position).equalsIgnoreCase("Download")   )
                 tv.setTypeface(null, Typeface.BOLD);
+            else
+                tv.setTypeface(null, Typeface.NORMAL);
 
             final int item = position;
             convertView.setOnClickListener(new View.OnClickListener() {

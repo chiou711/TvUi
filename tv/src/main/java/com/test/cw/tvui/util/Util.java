@@ -3,6 +3,8 @@ package com.test.cw.tvui.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -279,5 +281,26 @@ public class Util {
         String strItem = oriStr.replaceAll(pattern,"");
         number = Integer.valueOf(strItem);
         return number;
+    }
+
+    // Get YouTube version number
+    // 1  YouTube versionNumber = 10311100, versionName = 1.3.11
+    // 2  YouTube versionNumber = 20019320, versionName = 2.00.19
+    public static int getYouTube_verNumber(Activity act)
+    {
+        PackageInfo packageInfo;
+        int versionNumber = 0;
+//        String versionName;
+        PackageManager pm = act.getPackageManager();
+        try {
+            packageInfo = pm.getPackageInfo(
+                    "com.google.android.youtube.tv", 0);
+            versionNumber = packageInfo.versionCode;
+            System.out.println("MainFragment / _onItemClicked / YouTube versionNumber = "+ versionNumber);
+//            versionName = packageInfo.versionName;
+//            System.out.println("MainFragment / _onItemClicked / YouTube versionName = "+ versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return versionNumber;
     }
 }

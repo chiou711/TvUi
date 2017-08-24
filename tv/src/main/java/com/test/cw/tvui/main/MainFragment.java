@@ -320,8 +320,11 @@ public class MainFragment extends BrowseFragment {
                     String id = Util.getYoutubeId(db_page.getNoteLinkUri(currLinkId,true));
                     System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                    intent.putExtra("force_fullscreen",true);
-                    intent.putExtra("finish_on_ended",true);
+
+                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
+                        intent.putExtra("force_fullscreen", true);
+                        intent.putExtra("finish_on_ended", true);
+                    }
 
                     // Continue play
                     getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
@@ -334,8 +337,10 @@ public class MainFragment extends BrowseFragment {
                     String id = Util.getYoutubeId(movie.getVideoUrl());
                     System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                    intent.putExtra("force_fullscreen",true);
-                    intent.putExtra("finish_on_ended",true);
+                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
+                        intent.putExtra("force_fullscreen", true);
+                        intent.putExtra("finish_on_ended", true);
+                    }
 
                     // Play once
                     getActivity().startActivity(intent);
