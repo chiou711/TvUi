@@ -105,7 +105,8 @@ public class Import_fileView extends Fragment
 		backButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
-				Import_fileListAct.onBackPressedListener.doBack();
+                getActivity().getSupportFragmentManager().popBackStack();
+                Import_fileListAct.isBack_fileView = true;
 			}
 		});
 
@@ -129,7 +130,8 @@ public class Import_fileView extends Fragment
 							public void onClick(DialogInterface dialog1, int which1)
 							{
 								mFile.delete();
-								Import_fileListAct.onBackPressedListener.doBack();
+                                getActivity().getSupportFragmentManager().popBackStack();
+                                Import_fileListAct.isBack_fileView = true;
 							}
 						})
 						.show();
@@ -150,8 +152,6 @@ public class Import_fileView extends Fragment
 				confirmTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		});
-
-        ((Import_fileListAct)getActivity()).setOnBackPressedListener(new OnBackPressedListener(getActivity()));
 
         return rootView;
 
@@ -271,7 +271,8 @@ public class Import_fileView extends Fragment
 			
 			if(enableSaveDB)
 			{
-				Import_fileListAct.onBackPressedListener.doBack();
+                getActivity().getSupportFragmentManager().popBackStack();
+                Import_fileListAct.isBack_fileView = true;
 				Toast.makeText(getActivity(),"Import finished",Toast.LENGTH_SHORT).show();//TODO local
 			}
 			else

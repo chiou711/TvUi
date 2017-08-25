@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -149,14 +150,15 @@ public class MainFragment extends BrowseFragment {
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
 
         for(int i=1;i<= Define.ORIGIN_FOLDERS_COUNT;i++) {
-            if(i==1)
-                gridRowAdapter.add("1st");
-            else if(i==2)
-                gridRowAdapter.add("2nd");
-            else if(i==3)
-                gridRowAdapter.add("3rd");
-            else
-                gridRowAdapter.add(String.valueOf(i).concat("th"));
+//            if(i==1)
+//                gridRowAdapter.add("1st");
+//            else if(i==2)
+//                gridRowAdapter.add("2nd");
+//            else if(i==3)
+//                gridRowAdapter.add("3rd");
+//            else
+//                gridRowAdapter.add(String.valueOf(i).concat("th"));
+            gridRowAdapter.add(String.valueOf(i));
         }
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
@@ -420,6 +422,8 @@ public class MainFragment extends BrowseFragment {
             view.setBackgroundColor(getResources().getColor(R.color.bar_color));
             view.setTextColor(Color.WHITE);
             view.setGravity(Gravity.CENTER);
+            view.setTextSize(25);
+            view.setTypeface(Typeface.DEFAULT_BOLD);
             return new ViewHolder(view);
         }
 

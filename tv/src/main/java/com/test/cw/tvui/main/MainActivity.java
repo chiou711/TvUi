@@ -89,6 +89,12 @@ public class MainActivity extends Activity {
         }
         else
             createDB_data();
+
+        // enable auto play for older YouTube App
+        if(Util.getYouTube_verNumber(this) <= 10311100)
+            Define.AUTO_PLAY_NEXT = true;
+        else
+            Define.AUTO_PLAY_NEXT = false;
     }
 
     // callback of granted permission
