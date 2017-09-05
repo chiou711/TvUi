@@ -52,6 +52,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.test.cw.tvui.R;
+import com.test.cw.tvui.details.DetailsActivity;
 import com.test.cw.tvui.main.CardPresenter;
 import com.test.cw.tvui.main.Movie;
 import com.test.cw.tvui.main.MovieList;

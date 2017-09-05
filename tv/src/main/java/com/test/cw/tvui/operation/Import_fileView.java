@@ -32,7 +32,6 @@ import android.widget.Toast;
 
 import com.test.cw.tvui.main.MainFragment;
 import com.test.cw.tvui.R;
-import com.test.cw.tvui.util.OnBackPressedListener;
 import com.test.cw.tvui.util.ColorSet;
 import com.test.cw.tvui.util.Util;
 import com.test.cw.tvui.db.DB_folder;
@@ -152,6 +151,9 @@ public class Import_fileView extends Fragment
 				confirmTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		});
+
+		// set focus on
+        confirmButton.requestFocus();
 
         return rootView;
 

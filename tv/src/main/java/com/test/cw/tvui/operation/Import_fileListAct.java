@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.test.cw.tvui.R;
-import com.test.cw.tvui.util.OnBackPressedListener;
 import com.test.cw.tvui.util.ColorSet;
 import com.test.cw.tvui.util.Util;
 

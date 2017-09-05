@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui.zNoUse;
+package com.test.cw.tvui.details;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -44,8 +44,11 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.test.cw.tvui.R;
+import com.test.cw.tvui.db.DB_folder;
+import com.test.cw.tvui.db.DB_page;
 import com.test.cw.tvui.main.CardPresenter;
 import com.test.cw.tvui.main.MainActivity;
+import com.test.cw.tvui.main.MainFragment;
 import com.test.cw.tvui.main.Movie;
 import com.test.cw.tvui.main.MovieList;
 import com.test.cw.tvui.util.Util;
@@ -61,8 +64,8 @@ import java.util.List;
 public class VideoDetailsFragment extends DetailsFragment {
     private static final String TAG = "VideoDetailsFragment";
 
-    private static final int ACTION_WATCH_TRAILER = 1;
-    private static final int ACTION_RENT = 2;
+    private static final int ACTION_WATCH = 1;
+    private static final int ACTION_DELETE = 2;
     private static final int ACTION_BUY = 3;
 
     private static final int DETAIL_THUMB_WIDTH = 274;
@@ -83,7 +86,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate DetailsFragment");
         super.onCreate(savedInstanceState);
-
+        isDelete = false;
         prepareBackgroundManager();
 
         mSelectedMovie = (Movie) getActivity().getIntent()
@@ -158,21 +161,24 @@ public class VideoDetailsFragment extends DetailsFragment {
                     }
                 });
 
-        row.addAction(new Action(ACTION_WATCH_TRAILER, getResources().getString(
-                R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
-        row.addAction(new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
-                getResources().getString(R.string.rent_2)));
-        row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
-                getResources().getString(R.string.buy_2)));
+//        row.addAction(new Action(ACTION_WATCH, getResources().getString(
+//                R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
+//        row.addAction(new Action(ACTION_DELETE, getResources().getString(R.string.rent_1),
+//                getResources().getString(R.string.rent_2)));
+//        row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
+//                getResources().getString(R.string.buy_2)));
+        row.addAction(new Action(ACTION_WATCH, "Open", "YouTube"));//TODO locale
+        row.addAction(new Action(ACTION_DELETE, "Delete", "Current item"));//TODO locale
 
         mAdapter.add(row);
     }
 
+    public static boolean isDelete;
     private void setupDetailsOverviewRowPresenter() {
         // Set detail background and style.
         DetailsOverviewRowPresenter detailsPresenter =
                 new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
-        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background));
+        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.bar_color));//R.color.selected_background
         detailsPresenter.setStyleLarge(true);
 
         // Hook up transition element.
@@ -182,11 +188,46 @@ public class VideoDetailsFragment extends DetailsFragment {
         detailsPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             @Override
             public void onActionClicked(Action action) {
-                if (action.getId() == ACTION_WATCH_TRAILER) {
-                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
-                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
-                    startActivity(intent);
-                } else {
+                if (action.getId() == ACTION_WATCH) {
+//                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+//                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
+//                    startActivity(intent);
+
+                    //Launch YouTube by item view click
+                    String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
+                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
+                        intent.putExtra("force_fullscreen", true);
+                        intent.putExtra("finish_on_ended", true);
+                    }
+
+                    // Play once
+                    getActivity().startActivity(intent);
+                }
+                else if (action.getId() == ACTION_DELETE)
+                {
+                    //delete current item in DB
+                    DB_page db_page = new DB_page(getActivity(),DB_page.getFocusPage_tableId());
+                    long id = db_page.getNoteId(MainFragment.currLinkId,true);
+                    db_page.deleteNote(id,true);
+
+                    db_page.open();
+                    int notesCount = db_page.getNotesCount(false);
+                    db_page.close();
+
+                    // delete current page if no any note
+                    if(notesCount == 0)
+                    {
+                        DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
+                        db_folder.deletePage(DB_folder.getFocusFolder_tableName(),DB_page.getFocusPage_tableId());
+                    }
+
+                    isDelete = true;
+                    getActivity().finish();
+                }
+                else
+                {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -196,12 +237,16 @@ public class VideoDetailsFragment extends DetailsFragment {
 
     private void setupMovieListRow() {
         String subcategories[] = {getString(R.string.related_movies)};
-        List<Movie> list = MovieList.list;
 
-        Collections.shuffle(list);
+        List<Movie> list = MovieList.setupMoviesByDB(getActivity(),MainFragment.currPageId);
+
+//        List<Movie> list = MovieList.list;//??? not the same row
+
+//        Collections.shuffle(list);
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (int j = 0; j < NUM_COLS; j++) {
-            listRowAdapter.add(list.get(j % 5));
+        for (int j = 0; j < list.size() ; j++) {
+//            listRowAdapter.add(list.get(j % 5));
+            listRowAdapter.add(list.get(j));
         }
 
         HeaderItem header = new HeaderItem(0, subcategories[0]);

@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.test.cw.tvui.zNoUse;
+package com.test.cw.tvui.details;
 
 import android.app.Activity;
 import android.os.Bundle;

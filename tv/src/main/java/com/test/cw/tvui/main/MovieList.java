@@ -12,8 +12,9 @@ import java.util.List;
 public final class MovieList {
     static int REQUEST_CONTINUE_PLAY = 999;
     static int REQUEST_IMPORT = 998;
+    public static int REQUEST_DETAIL = 997;
     public static List<Movie> list;
-    static List<Movie> setupMoviesByDB(Activity act,int pagePosition)
+    public static List<Movie> setupMoviesByDB(Activity act,int pagePosition)
     {
         int pageTableId;
         DB_folder db_folder = new DB_folder(act,DB_folder.getFocusFolder_tableId());
@@ -21,7 +22,7 @@ public final class MovieList {
         list = new ArrayList<>();
 
         // description
-        String description = "Movie description: oxoxoxox....";
+        String description = "Select action: Open or Delete";
 
         // URL list
         DB_page db_page = new DB_page(act,pageTableId);

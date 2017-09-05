@@ -33,6 +33,7 @@ import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
@@ -40,6 +41,7 @@ import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,6 +60,8 @@ import com.test.cw.tvui.operation.Import_fileListAct;
 import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
+import com.test.cw.tvui.details.DetailsActivity;
+import com.test.cw.tvui.details.VideoDetailsFragment;
 
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
@@ -276,8 +280,8 @@ public class MainFragment extends BrowseFragment {
 //    }
 
     static int currFolderNum = 1;
-    static int currPageId;
-    static int currLinkId;
+    public static int currPageId;
+    public static int currLinkId;
     boolean isKeyEventConsumed;
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
@@ -296,28 +300,28 @@ public class MainFragment extends BrowseFragment {
 //                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 //                getActivity().startActivity(intent, bundle);
 
+                currPageId = (int)row.getId();
+
+                DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
+                int pageTableId = db_folder.getPageTableId(currPageId,true);
+
+                DB_page db_page = new DB_page(getActivity(),pageTableId);
+                db_page.open();
+                int linksCount = db_page.getNotesCount(false);
+                setCurrLinksLength(linksCount);
+                db_page.close();
+
+                // get real link Id in row
+                for(int i=0;i<linksCount;i++)
+                {
+                    if(movie.getVideoUrl().equalsIgnoreCase(db_page.getNoteLinkUri(i,true)))
+                        currLinkId = i;
+                }
+                System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
+                System.out.println("MainFragment / _onItemClicked / currLinkId in row = "+ currLinkId);
+
                 if(Define.AUTO_PLAY_NEXT)
                 {
-                    currPageId = (int)row.getId();
-
-                    DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
-                    int pageTableId = db_folder.getPageTableId(currPageId,true);
-
-                    DB_page db_page = new DB_page(getActivity(),pageTableId);
-                    db_page.open();
-                    int linksCount = db_page.getNotesCount(false);
-                    setCurrLinksLength(linksCount);
-                    db_page.close();
-
-                    // get real link Id in row
-                    for(int i=0;i<linksCount;i++)
-                    {
-                        if(movie.getVideoUrl().equalsIgnoreCase(db_page.getNoteLinkUri(i,true)))
-                            currLinkId = i;
-                    }
-                    System.out.println("MainFragment / _onItemClicked / currPageId = "+ currPageId);
-                    System.out.println("MainFragment / _onItemClicked / currLinkId in row = "+ currLinkId);
-
                     //Launch YouTube by item view click
                     String id = Util.getYoutubeId(db_page.getNoteLinkUri(currLinkId,true));
                     System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
@@ -335,17 +339,27 @@ public class MainFragment extends BrowseFragment {
                 }
                 else
                 {
-                    //Launch YouTube by item view click
-                    String id = Util.getYoutubeId(movie.getVideoUrl());
-                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
-                        intent.putExtra("force_fullscreen", true);
-                        intent.putExtra("finish_on_ended", true);
-                    }
+                    // Option: Launch YouTube in DetailsActivity
+                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                    intent.putExtra(DetailsActivity.MOVIE, movie);
 
-                    // Play once
-                    getActivity().startActivity(intent);
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                                                getActivity(),
+                                                                ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                                                                DetailsActivity.SHARED_ELEMENT_NAME )
+                                                         .toBundle();
+                    startActivityForResult(intent, MovieList.REQUEST_DETAIL,bundle);
+
+                    // Option: Launch YouTube by item view click
+//                    String id = Util.getYoutubeId(movie.getVideoUrl());
+//                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+//                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
+//                        intent.putExtra("force_fullscreen", true);
+//                        intent.putExtra("finish_on_ended", true);
+//                    }
+//                    // Play once
+//                    getActivity().startActivity(intent);
                 }
             }
             else if (item instanceof String)
@@ -456,16 +470,33 @@ public class MainFragment extends BrowseFragment {
             setupUIElements();
             loadItemsAsync(DB_folder.getFocusFolder_tableId());
         }
+        else if((requestCode == MovieList.REQUEST_DETAIL) && VideoDetailsFragment.isDelete)
+        {
+            // add for fixing exception
+            DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
+            db_folder.open();
+            int pageCount = db_folder.getPagesCount(false);
+            db_folder.close();
+            if(pageCount == 0)
+                setSelectedPosition(0);
+
+            setupUIElements();
+            loadItemsAsync(DB_folder.getFocusFolder_tableId());
+            VideoDetailsFragment.isDelete = false;
+        }
     }
 
-    private class LoadItemAsyncTask extends AsyncTask<Void, Integer, Void> {
+    private class LoadItemAsyncTask extends AsyncTask<Void, Integer, Void>
+    {
         int folderNum;
         LoadItemAsyncTask(int folderNum)
         {
             this.folderNum = folderNum;
         }
+
         ProgressBar bar;
-        public void setProgressBar(ProgressBar bar) {
+        public void setProgressBar(ProgressBar bar)
+        {
             this.bar = bar;
             bar.setVisibility(View.VISIBLE);
         }
@@ -489,6 +520,7 @@ public class MainFragment extends BrowseFragment {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             bar.setVisibility(View.GONE);
+            System.out.println("MainFragment / _LoadItemAsyncTask / _onPostExecute / mRowsAdapter.size() = " +mRowsAdapter.size());
             // set adapter
             setAdapter(mRowsAdapter);
             setupEventListeners();

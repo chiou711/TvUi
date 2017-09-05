@@ -33,9 +33,9 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!--<activity android:name=".DetailsActivity"/>-->
-        <!--<activity android:name=".PlaybackOverlayActivity"/>-->
-        <!--<activity android:name=".BrowseErrorActivity"/>-->
+        <activity android:name=".details.DetailsActivity"/>
+        <!--<activity android:name=".zNoUse.PlaybackOverlayActivity"/>-->
+        <!--<activity android:name=".zNoUse.BrowseErrorActivity"/>-->
         <activity android:name=".operation.Import_fileListAct"/>
     </application>
 
