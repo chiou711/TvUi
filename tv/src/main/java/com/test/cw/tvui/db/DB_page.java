@@ -77,7 +77,7 @@ public class DB_page
 //			// since the page table does not exist, delete the tab in com.test.cw.tvui.folder table
 //			System.out.println("   getFocusFolder_tableName() = " + getFocusFolder_tableName());
 //			System.out.println("   TabsHost.mCurrentTabIndex = " + TabsHost.mNow_pageId);
-//			deletePage( TabsHost.mNow_pageId, MainActivity.act);
+//			deletePageRow( TabsHost.mNow_pageId, MainActivity.act);
 //
 //			DB_drawer db_drawer = new DB_drawer(MainActivity.act);
 //			db_drawer.open();

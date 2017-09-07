@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
                 String link = getYouTubeLink();
                 nextLinkTitle =  Util.getYouTubeTitle(link);
 
-                countStr = "If not running, please press No within " + count + " seconds.";//TODO lcoal
+                countStr = "If not running, please press No within " + count + " seconds.";//TODO lcoale
                 countStr = countStr.replaceFirst("[0-9]",String.valueOf(count));
                 builder.setTitle("Continue running next link?")
                         .setMessage(nextLinkTitle +"\n\n" + countStr)
@@ -230,7 +230,7 @@ public class MainActivity extends Activity {
             // show count down
             TextView messageView = (TextView) alertDlg.findViewById(android.R.id.message);
             count--;
-            countStr = "If not running, please press No within " + count + " seconds.";//TODO local
+            countStr = "If not running, please press No within " + count + " seconds.";//TODO locale
             countStr = countStr.replaceFirst("[0-9]",String.valueOf(count));
             messageView.setText(nextLinkTitle + "\n\n" +countStr);
 

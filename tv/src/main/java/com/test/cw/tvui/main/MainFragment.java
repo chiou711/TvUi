@@ -99,7 +99,7 @@ public class MainFragment extends BrowseFragment {
         isNewDB = !Util.getPref_has_default_import(getActivity(),0);
         if(isNewDB) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle("Will load data items")//TODO local
+            builder.setTitle("Will load data items")//TODO locale
                    .setMessage("It takes a period to load completely.")
                    .setNegativeButton("Wait", listener_wait)
                    .setPositiveButton("No", null);
@@ -149,7 +149,7 @@ public class MainFragment extends BrowseFragment {
         int countRows = 0;
 
         // other
-        HeaderItem gridHeader = new HeaderItem(countRows, "Folders"); //TODO local
+        HeaderItem gridHeader = new HeaderItem(countRows, "Folders"); //TODO locale
         GridItemPresenter gridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
 
@@ -479,6 +479,8 @@ public class MainFragment extends BrowseFragment {
             db_folder.close();
             if(pageCount == 0)
                 setSelectedPosition(0);
+            else
+                setSelectedPosition(1);
 
             setupUIElements();
             loadItemsAsync(DB_folder.getFocusFolder_tableId());

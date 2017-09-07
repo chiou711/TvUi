@@ -37,4 +37,11 @@
     <string name="error_fragment_message">An error occurred</string>
     <string name="dismiss_error">Dismiss</string>
     <string name="oops">Oops</string>
+
+    <!--Delete note(s)-->
+    <string name="delete_option_title">Delete current item or whole page?</string>
+    <string name="delete_note_option">Current item</string>
+    <string name="delete_page_option">Whole page</string>
+    <string name="btn_OK">OK</string>
+    <string name="btn_NO">No</string>
 </resources>

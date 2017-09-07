@@ -14,6 +14,9 @@
 
 package com.test.cw.tvui.details;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,7 +29,6 @@ import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
 import android.support.v17.leanback.widget.DetailsOverviewRowPresenter;
 import android.support.v17.leanback.widget.HeaderItem;
-import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
@@ -34,9 +36,13 @@ import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -54,7 +60,6 @@ import com.test.cw.tvui.main.MovieList;
 import com.test.cw.tvui.util.Util;
 import com.test.cw.tvui.util.Utils;
 
-import java.util.Collections;
 import java.util.List;
 
 /*
@@ -173,6 +178,9 @@ public class VideoDetailsFragment extends DetailsFragment {
         mAdapter.add(row);
     }
 
+    RadioGroup radioGroup;
+    RadioButton deleteNote;
+    RadioButton deletePage;
     public static boolean isDelete;
     private void setupDetailsOverviewRowPresenter() {
         // Set detail background and style.
@@ -195,7 +203,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                     //Launch YouTube by item view click
                     String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
-                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
+                    System.out.println("VideoDetailsFragment / _setupDetailsOverviewRowPresenter / _onActionClicked / YouTube id = "+ id);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
                     if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
                         intent.putExtra("force_fullscreen", true);
@@ -207,24 +215,32 @@ public class VideoDetailsFragment extends DetailsFragment {
                 }
                 else if (action.getId() == ACTION_DELETE)
                 {
-                    //delete current item in DB
-                    DB_page db_page = new DB_page(getActivity(),DB_page.getFocusPage_tableId());
-                    long id = db_page.getNoteId(MainFragment.currLinkId,true);
-                    db_page.deleteNote(id,true);
+                    //Confirmation dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-                    db_page.open();
-                    int notesCount = db_page.getNotesCount(false);
-                    db_page.close();
+                    builder.setTitle(R.string.delete_option_title)
+                           .setPositiveButton(R.string.btn_OK, listener_OK)
+                           .setNegativeButton(R.string.btn_NO, listener_NO);//TODO locale
 
-                    // delete current page if no any note
-                    if(notesCount == 0)
-                    {
-                        DB_folder db_folder = new DB_folder(getActivity(),DB_folder.getFocusFolder_tableId());
-                        db_folder.deletePage(DB_folder.getFocusFolder_tableName(),DB_page.getFocusPage_tableId());
-                    }
+                    // inflate select style layout
+                    LayoutInflater mInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View view = mInflater.inflate(R.layout.delete_option_dlg, null);
 
-                    isDelete = true;
-                    getActivity().finish();
+                    radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup);
+                    deleteNote = (RadioButton) view.findViewById(R.id.deleteNote);
+                    deleteNote.setChecked(true);
+                    deletePage = (RadioButton) view.findViewById(R.id.deletePage);
+
+                    builder.setView(view);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                    // request focus
+                    Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    positive.setFocusable(true);
+                    positive.setFocusableInTouchMode(true);
+                    positive.requestFocus();
+
                 }
                 else
                 {
@@ -235,13 +251,52 @@ public class VideoDetailsFragment extends DetailsFragment {
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
     }
 
+    DialogInterface.OnClickListener listener_OK = new DialogInterface.OnClickListener()
+    {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+
+            DB_folder db_folder = new DB_folder(getActivity(), DB_folder.getFocusFolder_tableId());
+//          if(radioGroup.getCheckedRadioButtonId() == R.id.deleteNote) {
+            if(deleteNote.isChecked()) {
+                //delete current item in DB
+                DB_page db_page = new DB_page(getActivity(), DB_page.getFocusPage_tableId());
+                long id = db_page.getNoteId(MainFragment.currLinkId, true);
+                db_page.deleteNote(id, true);
+
+                db_page.open();
+                int notesCount = db_page.getNotesCount(false);
+                db_page.close();
+
+                // delete current page if no any note
+                if (notesCount == 0)
+                    db_folder.deleteCurrentPage();
+            }
+            else if(deletePage.isChecked())
+                db_folder.deleteCurrentPage();
+
+            isDelete = true;
+            getActivity().finish();
+
+            //end
+            dialog.dismiss();
+        }
+    };
+
+    DialogInterface.OnClickListener listener_NO = new DialogInterface.OnClickListener()
+    {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+        }
+    };
+
     private void setupMovieListRow() {
         String subcategories[] = {getString(R.string.related_movies)};
 
         List<Movie> list = MovieList.setupMoviesByDB(getActivity(),MainFragment.currPageId);
 
-//        List<Movie> list = MovieList.list;//??? not the same row
-
+//        List<Movie> list = MovieList.list;
 //        Collections.shuffle(list);
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         for (int j = 0; j < list.size() ; j++) {
@@ -263,19 +318,30 @@ public class VideoDetailsFragment extends DetailsFragment {
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Movie) {
+//                Movie movie = (Movie) item;
+//                Log.d(TAG, "Item: " + item.toString());
+//                Intent intent = new Intent(getActivity(), DetailsActivity.class);
+//                intent.putExtra(getResources().getString(R.string.movie), movie);
+//                intent.putExtra(getResources().getString(R.string.should_start), true);
+//                startActivity(intent);
+
+                //Launch YouTube by item view click
                 Movie movie = (Movie) item;
-                Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(getResources().getString(R.string.movie), mSelectedMovie);
-                intent.putExtra(getResources().getString(R.string.should_start), true);
-                startActivity(intent);
+                String id = Util.getYoutubeId(movie.getVideoUrl());
+                System.out.println("VideoDetailsFragment / _setupDetailsOverviewRowPresenter / _onActionClicked / YouTube id = "+ id);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
+                if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
+                    intent.putExtra("force_fullscreen", true);
+                    intent.putExtra("finish_on_ended", true);
+                }
+                getActivity().startActivity(intent);
 
+//                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+//                        getActivity(),
+//                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+//                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+//                getActivity().startActivity(intent, bundle);
 
-                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
-                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
-                getActivity().startActivity(intent, bundle);
             }
         }
     }

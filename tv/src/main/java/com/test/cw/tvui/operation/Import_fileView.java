@@ -115,7 +115,7 @@ public class Import_fileView extends Fragment
 			public void onClick(View view)
 			{
 				AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
-				builder1.setTitle("Confirmation")//TODO local
+				builder1.setTitle("Confirmation")//TODO locale
 						.setMessage("Do you want to delete this file?" +
 								" (" + mFile.getName() +")" )
 						.setNegativeButton("No", new DialogInterface.OnClickListener()
@@ -275,7 +275,7 @@ public class Import_fileView extends Fragment
 			{
                 getActivity().getSupportFragmentManager().popBackStack();
                 Import_fileListAct.isBack_fileView = true;
-				Toast.makeText(getActivity(),"Import finished",Toast.LENGTH_SHORT).show();//TODO local
+				Toast.makeText(getActivity(),"Import finished",Toast.LENGTH_SHORT).show();//TODO locale
 			}
 			else
 			{

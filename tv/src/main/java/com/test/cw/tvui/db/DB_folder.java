@@ -126,8 +126,15 @@ public class DB_folder
         	db.close();
     }
 
+    //delete page
+    public void deleteCurrentPage()
+    {
+        deletePageRow(getFocusFolder_tableName(), DB_page.getFocusPage_tableId());
+        deletePageTable(getFocusFolder_tableId(), DB_page.getFocusPage_tableId());
+    }
+
     //delete page table
-    public void dropPageTable(int id)
+    public void deletePageTable(int id)
     {   
     	this.open();
 
@@ -140,12 +147,12 @@ public class DB_folder
     }   
     
     //delete page table by drawer com.test.cw.tvui.folder table Id
-    public void dropPageTable(int drawerFolderTableId, int id)
+    public void deletePageTable(int folderTableId, int id)
     {   
     	this.open();
 
         //format "Page1_2"
-    	DB_PAGE_TABLE_NAME = DB_PAGE_TABLE_PREFIX.concat(String.valueOf(drawerFolderTableId)+"_"+String.valueOf(id));
+    	DB_PAGE_TABLE_NAME = DB_PAGE_TABLE_PREFIX.concat(String.valueOf(folderTableId)+"_"+String.valueOf(id));
         String dB_drop_table = "DROP TABLE IF EXISTS " + DB_PAGE_TABLE_NAME + ";";
         mSqlDb.execSQL(dB_drop_table);         
 
@@ -209,20 +216,20 @@ public class DB_folder
     }
     
     // delete page
-    public long deletePage(String table, int tabId)
+    public long deletePageRow(String table, int pageId)
     {
-    	System.out.println("DB / deletePage / table = " + table + ", tab Id = " + tabId);
+    	System.out.println("DB / deletePageRow / table = " + table + ", pageId = " + pageId);
 
         this.open();
-        long rowsNumber = mSqlDb.delete(table, KEY_PAGE_ID + "='" + tabId +"'", null);
+        long rowsCnt = mSqlDb.delete(table, KEY_PAGE_ID + "='" + pageId +"'", null);
         this.close();
 
-        if(rowsNumber > 0)
-        	System.out.println("DB / deletePage / rowsNumber =" + rowsNumber);
+        if(rowsCnt > 0)
+        	System.out.println("DB / deletePageRow / rowsCnt =" + rowsCnt);
         else
-        	System.out.println("DB / deletePage / failed to delete");
+        	System.out.println("DB / deletePageRow / failed to delete");
 
-        return rowsNumber;
+        return rowsCnt;
     }
 
     //update page
