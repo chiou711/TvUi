@@ -2,6 +2,7 @@ package com.test.cw.tvui.operation;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Xml;
 
 import com.test.cw.tvui.main.MainFragment;
 import com.test.cw.tvui.util.Util;
@@ -62,6 +63,7 @@ public class ParseXmlToDB {
                     InputStream stream = fileInputStream;
                     final int folder_table_id = folderTableId;
                     XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                    parser.setFeature(Xml.FEATURE_RELAXED, true);
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
                     parser.setInput(stream, null);
                     parseXML(parser,folder_table_id);

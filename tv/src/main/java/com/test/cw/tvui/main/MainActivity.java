@@ -41,11 +41,6 @@ import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
 
-import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
-import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
-import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
-import static android.view.KeyEvent.KEYCODE_DPAD_UP;
-
 /*
  * MainActivity class that loads MainFragment
  */
@@ -274,8 +269,8 @@ public class MainActivity extends Activity {
             }
 
             BaseInputConnection mInputConnection = new BaseInputConnection(findViewById(R.id.main_browse_fragment), true);
-            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_RIGHT));
-            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_RIGHT));
+            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
+            mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_RIGHT));
 
             // delay
             try {
@@ -355,8 +350,8 @@ public class MainActivity extends Activity {
             // point to first item of current row
             for(int i=0;i<dPadSteps;i++)
             {
-                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_LEFT));
-                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_LEFT));
+                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
+                mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_LEFT));
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
@@ -375,8 +370,8 @@ public class MainActivity extends Activity {
             if(MainFragment.currPageId == 0)
             {
                 for (int i = (MainFragment.getCurrPagesLength()-1); i >= 1; i--) {
-                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_UP));
-                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_UP));
+                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP));
+                    mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_UP));
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
@@ -388,8 +383,8 @@ public class MainActivity extends Activity {
             {
                 // point to next row
                 BaseInputConnection connection = new BaseInputConnection(findViewById(R.id.main_browse_fragment), true);
-                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_DPAD_DOWN));
-                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KEYCODE_DPAD_DOWN));
+                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN));
+                connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_DOWN));
             }
 
             // add delay for viewer

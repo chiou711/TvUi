@@ -115,7 +115,10 @@ public class MainFragment extends BrowseFragment {
         }
         else
         {
-            loadItemsAsync(1);
+            int lastTimeView_folderTableId = Util.getPref_lastTimeView_folder_tableId(getActivity());
+//            isKeyEventConsumed = false;
+            currFolderNum = lastTimeView_folderTableId;
+            loadItemsAsync(lastTimeView_folderTableId);//TODO add last time viewed
         }
     }
 
@@ -126,6 +129,12 @@ public class MainFragment extends BrowseFragment {
         }
     };
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("MainFragment / _onResume");
+    }
 
     @Override
     public void onDestroy() {
@@ -148,8 +157,10 @@ public class MainFragment extends BrowseFragment {
         // prepare items
         int countRows = 0;
 
-        // other
+        // header
         HeaderItem gridHeader = new HeaderItem(countRows, "Folders"); //TODO locale
+
+        // folders row
         GridItemPresenter gridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
 
@@ -202,7 +213,7 @@ public class MainFragment extends BrowseFragment {
                 String link = db_page.getNoteLinkUri(j,true);
                 listRowAdapter.add(list.get(j));
                 // verify
-                System.out.println("MainFragment / _loadItemsByDB / link = " + link);
+//                System.out.println("MainFragment / _loadItemsByDB / link = " + link);
             }
 
             countRows++;
@@ -224,7 +235,7 @@ public class MainFragment extends BrowseFragment {
     private void setupUIElements() {
         // setBadgeDrawable(getActivity().getResources().getDrawable(
         // R.drawable.videos_by_google_banner));
-        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
+//        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
@@ -372,6 +383,10 @@ public class MainFragment extends BrowseFragment {
                 currFolderNum = Util.getNumberInString(((String) item));
                 setupUIElements();
                 loadItemsAsync(currFolderNum);
+
+                // set last time viewed folder position
+                Util.setPref_lastTimeView_folder_tableId(getActivity(),currFolderNum);
+
                 isKeyEventConsumed = false;
             }
         }
@@ -392,13 +407,23 @@ public class MainFragment extends BrowseFragment {
 //                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0)
 //                if (((String) item).contains(getString(R.string.error_fragment)))
 
+                if(currFolderNum == Integer.valueOf((String) item))
+                    setTitle("Current Folder");//TODO locale
+                else
+                    setTitle("Select" + " " + item + " ");
+
+                System.out.println("MainFragment / _onItemSelected / currFolderNum = " + currFolderNum);
+                System.out.println("MainFragment / _onItemSelected / item = " + item);
+                System.out.println("MainFragment / _onItemSelected / isKeyEventConsumed = " + isKeyEventConsumed);
+
                 // workaround: since no way to set focus for selected item yet
-                if(!isKeyEventConsumed)
+                if(!isKeyEventConsumed) //??? can not work after Open time
                 {
                     BaseInputConnection  mInputConnection = new BaseInputConnection(itemViewHolder.view.getRootView(), true);
                     for(int i=1;i<currFolderNum;i++) {
-                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, 22));
-                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, 22));
+                        System.out.println("MainFragment / _onItemSelected / i = " + i);
+                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
+                        mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_RIGHT));
                     }
                     isKeyEventConsumed = true;
                 }
@@ -528,7 +553,6 @@ public class MainFragment extends BrowseFragment {
             setupEventListeners();
             rootView.setVisibility(View.VISIBLE);
         }
-
     }
 
 

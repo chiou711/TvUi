@@ -296,11 +296,28 @@ public class Util {
             packageInfo = pm.getPackageInfo(
                     "com.google.android.youtube.tv", 0);
             versionNumber = packageInfo.versionCode;
-            System.out.println("MainFragment / _onItemClicked / YouTube versionNumber = "+ versionNumber);
+            System.out.println("Util / _getYouTube_verNumber / YouTube versionNumber = "+ versionNumber);
 //            versionName = packageInfo.versionName;
 //            System.out.println("MainFragment / _onItemClicked / YouTube versionName = "+ versionName);
         } catch (PackageManager.NameNotFoundException e) {
         }
         return versionNumber;
+    }
+
+
+    // set page table id of last time view
+    public static void setPref_lastTimeView_folder_tableId(Activity act, int folderTableId )
+    {
+        SharedPreferences pref = act.getSharedPreferences("last_time_view", 0);
+        String keyName = "KEY_LAST_TIME_VIEW_DRAWER_FOLDER_TABLE_ID";
+        pref.edit().putInt(keyName, folderTableId).apply();
+    }
+
+    // get page table id of last time view
+    public static int getPref_lastTimeView_folder_tableId(Context context)
+    {
+        SharedPreferences pref = context.getSharedPreferences("last_time_view", 0);
+        String keyName = "KEY_LAST_TIME_VIEW_DRAWER_FOLDER_TABLE_ID";
+        return pref.getInt(keyName, 1); // folder table Id: default is 1
     }
 }

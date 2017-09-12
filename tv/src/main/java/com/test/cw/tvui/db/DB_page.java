@@ -68,7 +68,7 @@ public class DB_page
 		try
 		{
 			mCursor_note = this.getNoteCursor_byPageTableId(getFocusPage_tableId());
-			System.out.println("DB_page / _open / open page table OK / table name = " + DB_PAGE_TABLE_NAME);
+//			System.out.println("DB_page / _open / open page table OK / table name = " + DB_PAGE_TABLE_NAME);
 		}
 		catch(Exception e)
 		{
