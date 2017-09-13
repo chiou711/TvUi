@@ -48,6 +48,8 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.BaseInputConnection;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -116,9 +118,9 @@ public class MainFragment extends BrowseFragment {
         else
         {
             int lastTimeView_folderTableId = Util.getPref_lastTimeView_folder_tableId(getActivity());
-//            isKeyEventConsumed = false;
+            isKeyEventConsumed = true;
             currFolderNum = lastTimeView_folderTableId;
-            loadItemsAsync(lastTimeView_folderTableId);//TODO add last time viewed
+            loadItemsAsync(currFolderNum);//TODO add last time viewed
         }
     }
 
@@ -165,16 +167,9 @@ public class MainFragment extends BrowseFragment {
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
 
         for(int i=1;i<= Define.ORIGIN_FOLDERS_COUNT;i++) {
-//            if(i==1)
-//                gridRowAdapter.add("1st");
-//            else if(i==2)
-//                gridRowAdapter.add("2nd");
-//            else if(i==3)
-//                gridRowAdapter.add("3rd");
-//            else
-//                gridRowAdapter.add(String.valueOf(i).concat("th"));
             gridRowAdapter.add(String.valueOf(i));
         }
+
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         // Only one folder, default folder table id = 1
@@ -215,12 +210,8 @@ public class MainFragment extends BrowseFragment {
                 // verify
 //                System.out.println("MainFragment / _loadItemsByDB / link = " + link);
             }
-
             countRows++;
         }
-
-        // set adapter
-//        setAdapter(mRowsAdapter);
     }
 
 //    private void prepareBackgroundManager() {
@@ -248,7 +239,6 @@ public class MainFragment extends BrowseFragment {
 
     public void setupEventListeners() {
         System.out.println("MainFragment / _setupEventListeners");
-
         // Search Click
         setOnSearchClickedListener(new View.OnClickListener()
         {
@@ -298,7 +288,6 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
-
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
@@ -395,8 +384,10 @@ public class MainFragment extends BrowseFragment {
     private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
-            if (item instanceof Movie) {
+                                   RowPresenter.ViewHolder rowViewHolder, Row row)
+        {
+            if (item instanceof Movie)
+            {
 //                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
 //                startBackgroundTimer();
                 // workaround: since no way to set focus for selected item yet
@@ -408,30 +399,22 @@ public class MainFragment extends BrowseFragment {
 //                if (((String) item).contains(getString(R.string.error_fragment)))
 
                 if(currFolderNum == Integer.valueOf((String) item))
-                    setTitle("Current Folder");//TODO locale
+                    setTitle("* " + item + " *");
                 else
-                    setTitle("Select" + " " + item + " ");
+                    setTitle((String)item);
 
-                System.out.println("MainFragment / _onItemSelected / currFolderNum = " + currFolderNum);
-                System.out.println("MainFragment / _onItemSelected / item = " + item);
-                System.out.println("MainFragment / _onItemSelected / isKeyEventConsumed = " + isKeyEventConsumed);
-
-                // workaround: since no way to set focus for selected item yet
-                if(!isKeyEventConsumed) //??? can not work after Open time
+                // workaround: no way to synchronize focus position with clicked item yet
+                if(!isKeyEventConsumed) //??? can not work after App open
                 {
                     BaseInputConnection  mInputConnection = new BaseInputConnection(itemViewHolder.view.getRootView(), true);
                     for(int i=1;i<currFolderNum;i++) {
-                        System.out.println("MainFragment / _onItemSelected / i = " + i);
                         mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
                         mInputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_RIGHT));
                     }
                     isKeyEventConsumed = true;
                 }
-
             }
-
         }
-
     }
 
 //    private class UpdateBackgroundTask extends TimerTask {
@@ -472,11 +455,24 @@ public class MainFragment extends BrowseFragment {
             ((TextView) viewHolder.view).setTextColor(getResources().getColor(R.color.white));
 
             int folderNum = Util.getNumberInString(((String) item));
-            if(folderNum == currFolderNum)
+            if(folderNum == currFolderNum)//show focus
+            {
                 viewHolder.view.setBackgroundColor(getResources().getColor(R.color.search_opaque));
+
+                // run scale animation and make focus item bigger
+                Animation anim = AnimationUtils.loadAnimation(getActivity(), R.anim.scale_to_bigger);
+                viewHolder.view.getRootView().startAnimation(anim);
+                anim.setFillAfter(true);
+            }
             else
+            {
                 viewHolder.view.setBackgroundColor(getResources().getColor(R.color.bar_color));
 
+                // run scale animation and make focus item normal
+                Animation anim = AnimationUtils.loadAnimation(getActivity(), R.anim.scale_to_normal);
+                viewHolder.view.getRootView().startAnimation(anim);
+                anim.setFillAfter(true);
+            }
         }
 
         @Override
