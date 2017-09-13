@@ -323,18 +323,7 @@ public class MainFragment extends BrowseFragment {
                 if(Define.AUTO_PLAY_NEXT)
                 {
                     //Launch YouTube by item view click
-                    String id = Util.getYoutubeId(db_page.getNoteLinkUri(currLinkId,true));
-                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-
-                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
-                        intent.putExtra("force_fullscreen", true);
-                        intent.putExtra("finish_on_ended", true);
-                    }
-
-                    // Continue play
-                    getActivity().startActivityForResult(intent,MovieList.REQUEST_CONTINUE_PLAY);
-
+                    Util.openLink_YouTube(getActivity(),db_page.getNoteLinkUri(currLinkId,true),MovieList.REQUEST_CONTINUE_PLAY);
                     isKeyEventConsumed = false;
                 }
                 else
@@ -351,15 +340,7 @@ public class MainFragment extends BrowseFragment {
                     startActivityForResult(intent, MovieList.REQUEST_DETAIL,bundle);
 
                     // Option: Launch YouTube by item view click
-//                    String id = Util.getYoutubeId(movie.getVideoUrl());
-//                    System.out.println("MainFragment / _onItemClicked / YouTube id = "+ id);
-//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-//                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
-//                        intent.putExtra("force_fullscreen", true);
-//                        intent.putExtra("finish_on_ended", true);
-//                    }
-//                    // Play once
-//                    getActivity().startActivity(intent);
+//                    Util.openLink_YouTube(getActivity(),movie.getVideoUrl(),0);
                 }
             }
             else if (item instanceof String)

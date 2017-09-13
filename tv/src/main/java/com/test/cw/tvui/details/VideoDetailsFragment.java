@@ -202,16 +202,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 //                    startActivity(intent);
 
                     //Launch YouTube by item view click
-                    String id = Util.getYoutubeId(mSelectedMovie.getVideoUrl());
-                    System.out.println("VideoDetailsFragment / _setupDetailsOverviewRowPresenter / _onActionClicked / YouTube id = "+ id);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                    if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
-                        intent.putExtra("force_fullscreen", true);
-                        intent.putExtra("finish_on_ended", true);
-                    }
-
-                    // Play once
-                    getActivity().startActivity(intent);
+                    Util.openLink_YouTube(getActivity(),mSelectedMovie.getVideoUrl(),0);
                 }
                 else if (action.getId() == ACTION_DELETE)
                 {
@@ -327,14 +318,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 //Launch YouTube by item view click
                 Movie movie = (Movie) item;
-                String id = Util.getYoutubeId(movie.getVideoUrl());
-                System.out.println("VideoDetailsFragment / _setupDetailsOverviewRowPresenter / _onActionClicked / YouTube id = "+ id);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + id));
-                if(Util.getYouTube_verNumber(getActivity()) <= 10311100){
-                    intent.putExtra("force_fullscreen", true);
-                    intent.putExtra("finish_on_ended", true);
-                }
-                getActivity().startActivity(intent);
+                Util.openLink_YouTube(getActivity(),movie.getVideoUrl(),0);
 
 //                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
 //                        getActivity(),

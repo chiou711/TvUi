@@ -32,6 +32,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.4.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile files('libs/commons-io-2.4.jar')
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
 }
 
 allprojects {

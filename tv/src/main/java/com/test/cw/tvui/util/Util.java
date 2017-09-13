@@ -2,6 +2,7 @@ package com.test.cw.tvui.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -26,7 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import com.google.android.youtube.player.YouTubeIntents;
 /**
  * Created by cw on 2017/7/23.
  */
@@ -44,6 +45,59 @@ public class Util {
     }
 
     public static String NEW_LINE = "\r" + System.getProperty("line.separator");
+
+
+    public static void openLink_YouTube(Activity act, String linkUri,int request)
+    {
+        // by YouTube App
+        if(linkUri.contains("youtu.be") || linkUri.contains("youtube.com"))
+        {
+            // check Id string first
+            String idStr = Util.getYoutubeId(linkUri);
+            String listIdStr = Util.getYoutubeListId(linkUri);
+            String playListIdStr = Util.getYoutubePlaylistId(linkUri);
+
+            Intent intent = null;
+
+            // only v
+            if (!Util.isEmptyString(idStr) &&
+                    Util.isEmptyString(listIdStr) &&
+                    Util.isEmptyString(playListIdStr))
+            {
+                System.out.println("Util / _openLink_YouTube / v= ");
+                intent = YouTubeIntents.createPlayVideoIntent(act, idStr);
+            }
+            // v and list
+            else if(!Util.isEmptyString(idStr) &&
+                    !Util.isEmptyString(listIdStr) &&
+                    Util.isEmptyString(playListIdStr) )
+            {
+                System.out.println("Util / _openLink_YouTube / v= list= ");
+                intent = YouTubeIntents.createPlayPlaylistIntent(act, listIdStr);
+            }
+            // only playlist
+            else if( Util.isEmptyString(idStr) &&
+                    Util.isEmptyString(listIdStr) &&
+                    !Util.isEmptyString(playListIdStr) )
+            {
+                System.out.println("Util / _openLink_YouTube / playlist?list= ");
+                intent = YouTubeIntents.createPlayPlaylistIntent(act, playListIdStr);
+//                intent = YouTubeIntents.createOpenPlaylistIntent(act, playListIdStr);//same effect as above
+            }
+
+            if(Util.getYouTube_verNumber(act) <= 10311100)
+            {
+                intent.putExtra("force_fullscreen", true);
+                intent.putExtra("finish_on_ended", true);
+            }
+
+            if(request == 0)
+                act.startActivity(intent);
+            else
+                act.startActivityForResult(intent,request);
+        }
+    }
+
 
     // Get YouTube Id
     public static String getYoutubeId(String url) {
