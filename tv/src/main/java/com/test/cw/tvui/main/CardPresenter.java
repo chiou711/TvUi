@@ -15,13 +15,14 @@
 package com.test.cw.tvui.main;
 
 import android.graphics.drawable.Drawable;
-import android.support.v17.leanback.widget.ImageCardView;
-import android.support.v17.leanback.widget.Presenter;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.test.cw.tvui.R;
+
+import androidx.leanback.widget.ImageCardView;
+import androidx.leanback.widget.Presenter;
 
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand.

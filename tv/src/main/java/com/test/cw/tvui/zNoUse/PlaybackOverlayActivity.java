@@ -26,10 +26,12 @@ import android.view.KeyEvent;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.test.cw.tvui.R;
 import com.test.cw.tvui.main.Movie;
+
+import androidx.leanback.app.PlaybackFragment;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
@@ -67,19 +69,19 @@ public class PlaybackOverlayActivity extends Activity implements
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        PlaybackOverlayFragment playbackOverlayFragment = (PlaybackOverlayFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+        PlaybackFragment playbackFragment = (PlaybackFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
         switch (keyCode) {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                playbackOverlayFragment.togglePlayback(false);
+//                playbackFragment.togglePlayback(false);
                 return true;
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                playbackOverlayFragment.togglePlayback(false);
+//                playbackFragment.togglePlayback(false);
                 return true;
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-                    playbackOverlayFragment.togglePlayback(false);
+//                    playbackFragment.togglePlayback(false);
                 } else {
-                    playbackOverlayFragment.togglePlayback(true);
+//                    playbackFragment.togglePlayback(true);
                 }
                 return true;
             default:
@@ -151,11 +153,11 @@ public class PlaybackOverlayActivity extends Activity implements
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, movie.getStudio());
 
         Glide.with(this)
-                .load(Uri.parse(movie.getCardImageUrl()))
                 .asBitmap()
+                .load(Uri.parse(movie.getCardImageUrl()))
                 .into(new SimpleTarget<Bitmap>(500, 500) {
                     @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                    public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
                         metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
                         mSession.setMetadata(metadataBuilder.build());
                     }

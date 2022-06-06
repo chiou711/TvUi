@@ -14,9 +14,9 @@
 
 package com.test.cw.tvui.details;
 
-import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
-
 import com.test.cw.tvui.main.Movie;
+
+import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
 
 public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
 

@@ -85,7 +85,7 @@ public class Util {
 //                intent = YouTubeIntents.createOpenPlaylistIntent(act, playListIdStr);//same effect as above
             }
 
-            if(Util.getYouTube_verNumber(act) <= 10311100)
+            //if(Util.getYouTube_verNumber(act) <= 10311100)
             {
                 intent.putExtra("force_fullscreen", true);
                 intent.putExtra("finish_on_ended", true);

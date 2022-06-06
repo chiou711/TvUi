@@ -26,8 +26,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.widget.TextView;
@@ -40,6 +38,9 @@ import com.test.cw.tvui.folder.Folder;
 import com.test.cw.tvui.operation.Import_fileView;
 import com.test.cw.tvui.preference.Define;
 import com.test.cw.tvui.util.Util;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 /*
  * MainActivity class that loads MainFragment
@@ -86,10 +87,10 @@ public class MainActivity extends Activity {
             createDB_data();
 
         // enable auto play for older YouTube App
-        if(Util.getYouTube_verNumber(this) <= 10311100)
+//        if(Util.getYouTube_verNumber(this) <= 10311100)
             Define.AUTO_PLAY_NEXT = true;
-        else
-            Define.AUTO_PLAY_NEXT = false;
+//        else
+//            Define.AUTO_PLAY_NEXT = false;
     }
 
     // callback of granted permission
